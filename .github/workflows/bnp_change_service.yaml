@@ -21,7 +21,7 @@ jobs:
       - name: Checkout code with full history
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # 전체 커밋 히스토리를 가져옵니다.
+          fetch-depth: 0
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -38,11 +38,21 @@ jobs:
           PREV_COMMIT=$(git rev-parse HEAD~1)
           CHANGED_FILES=$(git diff --name-only $PREV_COMMIT HEAD)
           echo "Changed files: $CHANGED_FILES"
-          if echo "$CHANGED_FILES" | grep -qE "^${{ matrix.service }}/"; then
+          if echo "$CHANGED_FILES" | grep -qE "^${{ matrix.service }}/|^config\.py|^db\.py|^\.env"; then
+            echo "Preparing ${{ matrix.service }}..."
+            cp config.py ${{ matrix.service }}/
+            cp db.py ${{ matrix.service }}/
+            cp .env ${{ matrix.service }}/
+            if [ "${{ matrix.service }}" == "stock_kr_service" ]; then
+              # koreainvestment.key is already in stock_kr_service directory
+              echo "koreainvestment.key is already in stock_kr_service directory"
+            fi
             echo "Building and pushing ${{ matrix.service }}..."
             docker build -t $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG ./${{ matrix.service }}
             docker push $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG
             echo "Pushed ${{ matrix.service }} to ECR successfully."
+            # Clean up
+            rm ${{ matrix.service }}/config.py ${{ matrix.service }}/db.py ${{ matrix.service }}/.env
           else
             echo "No changes detected for ${{ matrix.service }}."
           fi
