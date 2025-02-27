@@ -39,6 +39,10 @@ jobs:
           CHANGED_FILES=$(git diff --name-only $PREV_COMMIT HEAD)
           echo "Changed files: $CHANGED_FILES"
           if echo "$CHANGED_FILES" | grep -qE "^${{ matrix.service }}/"; then
+            echo "Building and pushing ${{ matrix.service }}..."
             docker build -t $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG ./${{ matrix.service }}
             docker push $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG
+            echo "Pushed ${{ matrix.service }} to ECR successfully."
+          else
+            echo "No changes detected for ${{ matrix.service }}."
           fi

@@ -5,8 +5,7 @@ WORKDIR /app
 # 루트 디렉토리의 공통 파일들과 .env 파일을 복사
 COPY ../config.py ./config.py
 COPY ../db.py ./db.py
-COPY ../.env .env
-COPY . .
+COPY ../.env ./.env
 COPY ./stock_kr_service/koreainvestment.key ./koreainvestment.key
 COPY . .
 
