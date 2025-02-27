@@ -1,4 +1,3 @@
-# Dockerfile for exchange_service
 FROM python:3.9-slim
 
 WORKDIR /app
