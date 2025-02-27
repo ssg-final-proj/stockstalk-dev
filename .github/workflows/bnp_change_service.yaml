@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latests
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         service: [auth_service, stock_kr_service, exchange_service, portfolio_service]
