@@ -1,4 +1,4 @@
-name: Build and Push All Services to ECR
+name: Initial Build and Push All Services to ECR
 
 on:
   workflow_dispatch:  # 수동 실행 가능하도록 설정
@@ -8,16 +8,14 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: ap-northeast-2  # AWS 리전
-      ECR_REGISTRY: 707677861059.dkr.ecr.ap-northeast-2.amazonaws.com  # ECR 레지스트리
-      IMAGE_TAG: latest  # 이미지 태그 (필요 시 커밋 SHA로 변경 가능)
+      AWS_REGION: ap-northeast-2
+      ECR_REGISTRY: 707677861059.dkr.ecr.ap-northeast-2.amazonaws.com
+      IMAGE_TAG: latest
 
     steps:
-      # 1. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # 2. AWS 자격 증명 구성
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -25,29 +23,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # 3. AWS ECR 로그인
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-      # 4. Auth Service 빌드 및 푸시
       - name: Build and Push Auth Service Image
         run: |
           docker build -t $ECR_REGISTRY/auth_service:$IMAGE_TAG ./auth_service
           docker push $ECR_REGISTRY/auth_service:$IMAGE_TAG
 
-      # 5. Stock KR Service 빌드 및 푸시
       - name: Build and Push Stock KR Service Image
         run: |
           docker build -t $ECR_REGISTRY/stock_kr_service:$IMAGE_TAG ./stock_kr_service
           docker push $ECR_REGISTRY/stock_kr_service:$IMAGE_TAG
 
-      # 6. Exchange Service 빌드 및 푸시
       - name: Build and Push Exchange Service Image
         run: |
           docker build -t $ECR_REGISTRY/exchange_service:$IMAGE_TAG ./exchange_service
           docker push $ECR_REGISTRY/exchange_service:$IMAGE_TAG
 
-      # 7. Portfolio Service 빌드 및 푸시
       - name: Build and Push Portfolio Service Image
         run: |
           docker build -t $ECR_REGISTRY/portfolio_service:$IMAGE_TAG ./portfolio_service
