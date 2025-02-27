@@ -1,0 +1,176 @@
+/* 기본 레이아웃 */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* 헤더 스타일 */
+header {
+    background-color: #005f73;
+    color: #fff;
+    padding: 40px 20px;
+    text-align: center;
+    position: relative;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 26px;
+}
+
+.balance-info {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+    gap: 40px;
+}
+
+.balance-info p {
+    margin: 0;
+    font-size: 18px;
+}
+
+.balance-krw, .balance-usd {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.exchange-rate {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #caf0f8;
+}
+
+/* 네비게이션 바 스타일 */
+.navbar {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.navbar a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 10px 20px; /* 추가된 스타일 */
+    border-radius: 4px; /* 추가된 스타일 */
+    transition: background-color 0.3s, color 0.3s; /* 추가된 스타일 */
+}
+
+.navbar a:hover {
+    background-color: #003945; /* 배경 색상 변경 */
+    color: #ddd;
+}
+
+/* 메인 섹션 */
+main {
+    max-width: 600px;
+    margin: 30px auto;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+}
+
+main h2 {
+    margin-top: 0;
+    font-size: 22px;
+    text-align: center;
+    color: #005f73;
+}
+
+/* 통화 선택 버튼 */
+.currency-pair-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.currency-pair {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #e0e0e0;
+    color: #333;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    text-align: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.currency-pair:hover {
+    background-color: #005f73;
+    color: #fff;
+}
+
+.currency-pair.selected {
+    background-color: #005f73;
+    color: #fff;
+}
+
+/* 예상 환전 금액 */
+#expected_amount {
+    margin: 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+    color: #005f73;
+    text-align: center;
+}
+
+/* 입력 필드 */
+form label {
+    display: block;
+    font-size: 16px;
+    margin: 15px 0 5px;
+}
+
+form input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* 버튼 스타일 */
+form button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #005f73;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #003945;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    main {
+        padding: 20px;
+    }
+
+    .currency-pair {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    form button {
+        font-size: 14px;
+    }
+}

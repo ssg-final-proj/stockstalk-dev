@@ -1,0 +1,174 @@
+
+services:
+  write_db:
+    image: mysql:8.0
+    container_name: write_db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: vss_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-write-data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/my.cnf
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+    restart: always
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+
+  auth_service:
+    build:
+      context: ./auth_service
+    container_name: auth_service
+    restart: always
+    depends_on:
+      write_db:
+        condition: service_healthy
+    environment:
+      - FLASK_APP=app.app:create_app
+      - FLASK_ENV=development
+      - PYTHONPATH=/app
+      - AUTH_SCHEMA=${AUTH_SCHEMA}
+      - SQLALCHEMY_DATABASE_URI=${DATABASE_URL}  # 데이터베이스 URI 참조
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./auth_service:/app
+      - ./config.py:/app/config.py
+      - ./db.py:/app/db.py
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  stock_kr_service:
+    build:
+      context: ./stock_kr_service
+    container_name: stock_kr_service
+    restart: always
+    depends_on:
+      write_db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - FLASK_APP=app.app:create_app
+      - FLASK_ENV=development
+      - PYTHONPATH=/app
+      - KOREA_INVESTMENT_KEY_PATH=/app/koreainvestment.key
+      - SQLALCHEMY_DATABASE_URI=${DATABASE_URL}  # 데이터베이스 URI 참조
+      - STOCK_SCHEMA=${STOCK_SCHEMA}  # 스키마 설정
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./stock_kr_service:/app
+      - ./config.py:/app/config.py
+      - ./db.py:/app/db.py
+      - ./stock_kr_service/koreainvestment.key:/app/koreainvestment.key
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  exchange_service:
+    build:
+      context: ./exchange_service
+    container_name: exchange_service
+    restart: always
+    depends_on:
+      write_db:
+        condition: service_healthy
+    environment:
+      - FLASK_APP=app.app:create_app
+      - FLASK_ENV=development
+      - PYTHONPATH=/app
+      - SQLALCHEMY_DATABASE_URI=${DATABASE_URL}  # 데이터베이스 URI 참조
+      - EXCHANGE_SCHEMA=${EXCHANGE_SCHEMA}  # 스키마 설정
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./exchange_service:/app
+      - ./config.py:/app/config.py
+      - ./db.py:/app/db.py
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  portfolio_service:
+    build:
+      context: ./portfolio_service
+    container_name: portfolio_service
+    restart: always
+    depends_on:
+      write_db:
+        condition: service_healthy
+      auth_service:
+        condition: service_started
+    environment:
+      - FLASK_APP=app.app:create_app
+      - FLASK_ENV=development
+      - PYTHONPATH=/app
+      - SQLALCHEMY_DATABASE_URI=${DATABASE_URL}  # 데이터베이스 URI 참조
+      - PORTFOLIO_SCHEMA=${PORTFOLIO_SCHEMA}  # 스키마 설정
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./portfolio_service:/app
+      - ./config.py:/app/config.py
+      - ./db.py:/app/db.py
+    env_file:
+      - .env
+    networks:
+      - backend
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - backend
+    restart: always
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CREATE_TOPICS: "orders_topic:1:1"
+    depends_on:
+      zookeeper:
+        condition: service_started
+    networks:
+      - backend
+    restart: always
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mysql-write-data:
+    driver: local

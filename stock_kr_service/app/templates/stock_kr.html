@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가상 주식 시뮬레이션</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/stock_kr.js') }}"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>가상 주식 시뮬레이션</h1>
+            <div class="button-container">
+                <nav class="navbar-left">
+                    <a class="button" href="/">국내주식</a>
+                    <a class="button" href="/stock_us">미국주식</a>
+                </nav>
+                <nav class="navbar-right"> 
+                    <!-- 🔥 로그인 상태에 따라 JS에서 동적으로 변경 -->
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h2>실시간 국내 주식 정보</h2>
+        <div id="loader" style="display: none;">Loading...</div> <!-- 로딩 요소 추가 -->
+        <div id="error-message" style="color: red; display: none;"></div>
+        <table border="1" id="stock-table" style="display: none;"> <!-- 데이터 테이블 숨김 -->
+            <thead>
+                <tr>
+                    <th class="text-left">종목명</th>
+                    <th class="text-right">현재가</th>
+                    <th class="text-right">시작가</th>
+                    <th class="text-right">고가</th>
+                    <th class="text-right">저가</th>
+                    <th class="text-right">변동금액</th>
+                    <th class="text-right">변동률</th>
+                </tr>
+            </thead>
+            <tbody id="stock-data"></tbody>
+        </table>
+
+        <!-- 모달 창 -->
+        <div id="stock-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 id="stock-title"></h2>
+                <div id="stock-chart"></div>
+                <div id="trade-section">
+                    <button id="buy-button">매수</button>
+                    <button id="sell-button">매도</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

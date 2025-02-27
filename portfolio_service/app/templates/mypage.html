@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    {% if error %}
+    <script>
+        alert("{{ error }}");
+        window.location.href = "http://127.0.0.1:8001/auth";  // 로그인 페이지로 이동
+    </script>
+    {% endif %}
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>가상 주식 시뮬레이션</h1>
+            <p>{{ user.username if user else "로그인이 필요합니다." }}님의 마이페이지</p>
+            <nav class="navbar">
+                <a href="http://127.0.0.1:8002">홈</a>
+                <a href="http://127.0.0.1:8004">환전하기</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="user-info">
+            <h2>보유 자산</h2>
+            {% if user %}
+                <p><strong>닉네임:</strong> {{ user.username }}</p>
+                <p><strong>보유 원화:</strong> {{ "{:,.0f}".format(user['seed_krw']) }} KRW</p>
+                <p><strong>보유 달러:</strong> {{ "{:,.2f}".format(user['seed_usd']) }} USD</p>
+            {% else %}
+                <p>로그인이 필요합니다.</p>
+            {% endif %}
+        </section>
+        <section class="portfolio">
+            <h2>보유 종목</h2>
+            {% if portfolio %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>종목 이름</th>
+                            <th>수량</th>
+                            <th>총 가치</th>
+                            <th>초기 투자액</th>
+                            <th>수익률</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for portfolio_item, stock_name in portfolio %}
+                            <tr>
+                                <td>{{ stock_name }}</td>
+                                <td>{{ portfolio_item.stock_amount|int }}주</td>
+                                <td>{{ "{:,.0f}".format(portfolio_item.total_value) }} KRW</td>
+                                <td>{{ "{:,.0f}".format(portfolio_item.initial_investment) }} KRW</td>
+                                <td class="{% if portfolio_item.profit_rate > 0 %}profit-positive{% elif portfolio_item.profit_rate < 0 %}profit-negative{% else %}profit-zero{% endif %}">
+                                    {% if portfolio_item.initial_investment > 0 %}
+                                        {% if portfolio_item.real_time_profit_rate is defined %}
+                                            {{ "{:,.2f}".format(portfolio_item.real_time_profit_rate) }}%
+                                        {% else %}
+                                            {{ "{:,.2f}".format(portfolio_item.profit_rate) }}%
+                                        {% endif %}
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>                                                            
+                            </tr>
+                    {% endfor %}          
+                    </tbody>
+                </table>
+            {% else %}
+                <p>보유 종목이 없습니다.</p>
+            {% endif %}
+        </section>
+        <section class="order-history">
+            <h2>주문 내역</h2>
+            {% if today_orders %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>종목명</th>
+                            <th>주문 종류</th>
+                            <th>주문 가격</th>
+                            <th>수량</th>
+                            <th>상태</th>
+                            <th>주문일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order, stock_name in today_orders %}
+                            <tr>
+                                <td>{{ stock_name }}</td>
+                                <td class="{% if order.order_type == 'BUY' %}order-type-buy{% else %}order-type-sell{% endif %}">
+                                    {{ "매수" if order.order_type == "BUY" else "매도" }}
+                                </td>                                
+                                <td>{{ "{:,.0f}".format(order.target_price) if order.target_price is not none else 'N/A' }} KRW</td>
+                                <td>{{ order.quantity|int }}주</td>
+                                <td>
+                                    {% if order.status == "PENDING" %}
+                                        대기 중
+                                    {% elif order.status == "COMPLETED" %}
+                                        완료됨
+                                    {% else %}
+                                        취소됨
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.created_at.astimezone(KST).strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                            </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>현재 주문 내역이 없습니다.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="icon" href="/static/image/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/auth.css">
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</head>
+<body>
+    <div class="login-container">
+        <h2 class="title">login</h2>
+        <img 
+            src="/static/image/login_kakao.png" 
+            alt="카카오 로그인" 
+            class="login-button" 
+            onclick="redirectToKakao()"
+        >
+    </div>
+    <script>
+        function redirectToKakao() {
+            location.href = '/auth/kakaoLoginLogic';
+        }
+
+        // Flash message handling
+        document.addEventListener('DOMContentLoaded', () => {
+            const messages = "{{ messages }}"; // Flask message passed here
+            if (messages) {
+                alert(messages);
+            }
+        });
+    </script>
+</body>
+</html>

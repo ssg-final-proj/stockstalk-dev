@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주식 상세 정보</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stock_kr_detail.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/stock_kr_detail.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 상단 헤더 -->
+        <div class="header">
+            <h1 id="stock-name">{{ symbol }}</h1>
+            <p id="stock-info" style="font-size: 18px; color: #343a40; margin-top: 10px;"></p>
+        </div>
+        
+        <div class="main-content">
+            <div class="chart-and-orderbook">
+                <!-- 차트 / 호가 선택 버튼 -->
+                <div class="toggle-section">
+                    <h2 id="chart-toggle" class="toggle-button active" onclick="toggleView('chart')">주식 차트</h2>
+                    <h2 id="orderbook-toggle" class="toggle-button" onclick="toggleView('orderbook')">호가</h2>
+                </div>
+                
+                <!-- 주식 차트 섹션 -->
+                <div class="chart-section" id="chart-section">
+                    <div id="chart"></div>
+                </div>
+                
+                <!-- 호가 차트 섹션 (숨김 처리) -->
+                <div class="orderbook-section hidden" id="orderbook-section">
+                    <div id="order-book-chart"></div>
+                </div>
+            </div>
+            
+            <!-- 매수/매도 섹션 -->
+            <div class="order-section">
+                <h2>주문하기</h2>
+                <div class="order-buttons">
+                    <button id="buy-toggle" class="order-toggle buy active" onclick="toggleOrderForm('BUY')">매수</button>
+                    <button id="sell-toggle" class="order-toggle sell" onclick="toggleOrderForm('SELL')">매도</button>
+                </div>
+                <div id="order-form">
+                    <form id="buy-form" class="order-form active" onsubmit="event.preventDefault(); submitOrder('BUY');">
+                        <div class="order-input">
+                            <label for="buy-amount">수량:</label>
+                            <input type="number" id="buy-amount" placeholder="몇 주 구매할까요?" min="1">
+                        </div>
+                        <div class="order-input">
+                            <label for="buy-price">목표 가격:</label>
+                            <input type="number" id="buy-price" placeholder="목표 가격 입력" step="100">
+                        </div>
+                        <button type="submit" id="buy-submit" class="order-submit buy-submit">구매하기</button>
+                    </form>
+                    
+                    <form id="sell-form" class="order-form hidden" onsubmit="event.preventDefault(); submitOrder('SELL');">
+                        <div class="order-input">
+                            <label for="sell-amount">수량:</label>
+                            <input type="number" id="sell-amount" placeholder="몇 주 판매할까요?" min="1">
+                        </div>
+                        <div class="order-input">
+                            <label for="sell-price">목표 가격:</label>
+                            <input type="number" id="sell-price" placeholder="목표 가격 입력" step="100">
+                        </div>
+                        <button type="submit" id="sell-submit" class="order-submit sell-submit">판매하기</button>
+                    </form>
+                </div>
+                <div class="order-history">
+                    <h2>주문 내역</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>날짜</th>
+                                <th>구분</th>
+                                <th>수량</th>
+                                <th>가격</th>
+                            </tr>
+                        </thead>
+                        <tbody id="order-list">
+                            <!-- 주문 내역이 여기에 추가됨 -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 오류 메시지 표시 영역 -->
+                <div id="error-message" style="color: red; display: none;"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

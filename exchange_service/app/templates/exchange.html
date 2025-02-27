@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환전</title>
+    <link rel="stylesheet" href="/static/css/exchange.css">
+
+    {% if error %}
+    <script>
+        alert("{{ error }}");
+        window.location.href = "http://127.0.0.1:8001/auth";  // 로그인 페이지로 이동
+    </script>
+    {% endif %}
+</head>
+<body>
+    <header>
+        <h1>내 보유금</h1>
+        <div class="balance-info">
+            <p><strong>원화:</strong> 
+                <span class="balance-krw">
+                    {{ '{:,.0f}'.format(user['seed_krw']|round) if user else "0" }} KRW
+                </span>                
+            </p>
+            <p><strong>달러:</strong> 
+                <span class="balance-usd">
+                    {{ '{:.2f}'.format(user['seed_usd']) if user else "0.00" }} USD
+                </span>
+            </p>
+        </div>
+        <p class="exchange-rate"><strong>환율:</strong> 1 USD = 
+            <span id="exchange_rate">
+                {{ '{:.2f}'.format(exchange_rate) if exchange_rate else "N/A" }}
+            </span> KRW
+        </p>
+        <nav class="navbar">
+            <a href="http://127.0.0.1:8002">홈</a>
+            <a href="http://127.0.0.1:8003">마이페이지</a>
+        </nav>
+    </header>
+    <main>
+        <h2>환전하기</h2>
+        <div class="currency-pair-wrapper">
+            <div class="currency-pair selected" data-pair="KRW_to_USD">원화 → 외화 (USD)</div>
+            <div class="currency-pair" data-pair="USD_to_KRW">외화 (USD) → 원화</div>
+        </div>
+        <p id="message" class="alert-message">{{ message if message else '' }}</p>
+        <form action="/" method="post">
+            <input type="hidden" id="currency_pair" name="currency_pair" value="KRW_to_USD">
+            <label for="amount">금액:</label>
+            <input type="number" id="amount" name="amount" step="0.01" required>
+            <p id="expected_amount"></p>
+            <button type="submit">환전</button>
+        </form>
+    </main>
+    <script src="/static/js/exchange.js"></script>
+</body>
+</html>

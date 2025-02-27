@@ -1,0 +1,45 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* 로그인 컨테이너 */
+.login-container {
+    text-align: center;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 300px;
+    width: 100%;
+}
+
+/* Fancy 제목 스타일 */
+.fancy-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: 32px;
+    color: #005f73;
+    margin-bottom: 20px;
+}
+
+/* 카카오 로그인 버튼 */
+.login-button {
+    display: inline-block;
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-button:hover {
+    transform: scale(1.05); /* 호버 시 확대 */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* 호버 시 그림자 효과 */
+}

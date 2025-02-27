@@ -1,0 +1,182 @@
+/* 기본 스타일 설정 */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #2d3e50;
+    color: #fff;
+    padding: 55px 0px 20px 0px; /* 상하 패딩을 40px로 늘림 */
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 90px; /* 헤더의 최소 높이 설정 */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap; /* 버튼이 겹치지 않도록 조정 */
+    gap: 10px; /* 버튼 간격 */
+}
+
+.navbar-left, .navbar-right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* 버튼이 줄 바꿈되도록 조정 */
+}
+
+.button {
+    background-color: #2d3e50;
+    padding: 10px 20px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    font-size: 0.9rem;
+}
+
+.button:hover {
+    background-color: #1c2a38;
+}
+
+main {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    color: #2d3e50;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+table th.text-left {
+    text-align: left;
+}
+
+table th.text-right {
+    text-align: right;
+}
+
+table td {
+    background-color: #fff;
+    text-align: right; /* 기본적으로 오른쪽 정렬 */
+}
+
+td.text-left {
+    text-align: left; /* 종목명 왼쪽 정렬 */
+}
+
+td.bold-text {
+    font-weight: bold; /* 굵은 글씨 */
+}
+
+.change {
+    font-weight: bold;
+}
+
+.change-0 {
+    color: #888;
+    font-weight: bold;
+}
+
+.change-positive {
+    color: #f3443e;
+    font-weight: bold;
+}
+
+.change-negative {
+    color: #5b6fde;
+    font-weight: bold;
+}
+
+/* 종목명 링크 스타일 */
+.stock-link {
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.stock-link:hover {
+    background-color: #e0e0e0; /* 배경색이 진해짐 */
+}
+
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    .button {
+        padding: 8px 15px;
+        font-size: 0.8rem;
+    }
+
+    .button-container {
+        flex-direction: column; /* 버튼을 세로로 정렬 */
+        align-items: center;
+    }
+
+    main {
+        padding: 10px;
+    }
+
+    table {
+        font-size: 0.8rem;
+    }
+
+    table th, table td {
+        padding: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .button-container {
+        gap: 5px;
+    }
+
+    table {
+        font-size: 0.7rem;
+    }
+
+    table th, table td {
+        padding: 3px;
+    }
+
+    main {
+        margin: 10px;
+    }
+}
