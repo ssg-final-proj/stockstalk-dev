@@ -33,7 +33,6 @@ def kakaologin():
 
     return render_template("auth.html")
 
-
 @auth.route("/kakaoLoginLogic", methods=["GET"])
 def kakaoLoginLogic():
     """ 카카오 로그인 URL 생성 및 리다이렉트 """

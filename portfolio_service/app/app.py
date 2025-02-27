@@ -258,7 +258,7 @@ def handle_order_event(event):
         session.close()
 
 def update_user_in_auth_service(kakao_id, seed_krw):
-    update_url = "http://auth_service:8001/auth/api/update_user"
+    update_url = "http://3.34.97.76:8001/auth/api/update_user"
     try:
         user_data_str = redis_client_user.get(f'session:{kakao_id}')
         if not user_data_str:
