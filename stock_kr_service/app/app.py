@@ -177,16 +177,16 @@ def create_app():
     @app.route('/mypage')
     def mypage():
         if (kakao_id := request.cookies.get('kakao_id')):
-            return redirect(f'http://127.0.0.1:8003')  # 로그인된 사용자는 마이페이지로 리디렉션
+            return redirect(f'http://3.34.97.76:8003')  # 로그인된 사용자는 마이페이지로 리디렉션
         else:
-            return redirect(f'http://127.0.0.1:8001/auth')  # 로그인 안 된 사용자는 로그인 페이지로 리디렉션
+            return redirect(f'http://3.34.97.76:8001/auth')  # 로그인 안 된 사용자는 로그인 페이지로 리디렉션
         
     @app.route('/exchange')
     def exchange():
         if (kakao_id := request.cookies.get('kakao_id')):
-            return redirect(f'http://127.0.0.1:8004')
+            return redirect(f'http://3.34.97.76:8004')
         else:
-            return redirect(f'http://127.0.0.1:8001/auth')
+            return redirect(f'http://3.34.97.76:8001/auth')
     
     @app.route('/api/check-login', methods=['GET'])
     def check_login():
@@ -205,7 +205,7 @@ def create_app():
 
     @app.route('/login')
     def login():
-        return redirect(f'http://127.0.0.1:8001/auth')
+        return redirect(f'http://3.34.97.76:8001/auth')
 
     @app.route('/api/realtime-stock-data', methods=['GET'])
     @sync

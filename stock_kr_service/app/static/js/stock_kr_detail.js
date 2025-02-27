@@ -261,7 +261,7 @@ async function fetchOrderHistory(stockCode) {
         return;
     }
     try {
-        const response = await fetch(`http://127.0.0.1:8003/api/order-history?code=${stockCode}&kakao_id=${kakaoId}`);
+        const response = await fetch(`http://3.34.97.76:8003/api/order-history?code=${stockCode}&kakao_id=${kakaoId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

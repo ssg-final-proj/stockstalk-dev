@@ -37,9 +37,6 @@ services:
       context: ./auth_service
     container_name: auth_service
     restart: always
-    depends_on:
-      write_db:
-        condition: service_healthy
     environment:
       - FLASK_APP=app.app:create_app
       - FLASK_ENV=development

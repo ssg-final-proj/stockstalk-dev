@@ -9,7 +9,7 @@
     {% if error %}
     <script>
         alert("{{ error }}");
-        window.location.href = "http://127.0.0.1:8001/auth";  // 로그인 페이지로 이동
+        window.location.href = "http://3.34.97.76:8001/auth";  // 로그인 페이지로 이동
     </script>
     {% endif %}
 </head>
@@ -19,8 +19,8 @@
             <h1>가상 주식 시뮬레이션</h1>
             <p>{{ user.username if user else "로그인이 필요합니다." }}님의 마이페이지</p>
             <nav class="navbar">
-                <a href="http://127.0.0.1:8002">홈</a>
-                <a href="http://127.0.0.1:8004">환전하기</a>
+                <a href="http://3.34.97.76:8002">홈</a>
+                <a href="http://3.34.97.76:8004">환전하기</a>
             </nav>
         </div>
     </header>
