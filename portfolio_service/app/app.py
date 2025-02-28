@@ -361,9 +361,8 @@ def process_sell_order(event, session, user_data, current_price, order, portfoli
     user_seed_krw = float(user_data.get('seed_krw', 0))
 
     if portfolio_entry and portfolio_entry.stock_amount >= quantity and order.target_price <= current_price:
-        # 초기 투자금 감소
-        sell_ratio = quantity / portfolio_entry.stock_amount
-        initial_investment_reduction = portfolio_entry.initial_investment * sell_ratio
+        # 매도할 주식 수량에 비례하여 초기 투자액 감소
+        initial_investment_reduction = portfolio_entry.initial_investment * (quantity / portfolio_entry.stock_amount)
         portfolio_entry.initial_investment -= initial_investment_reduction
 
         portfolio_entry.stock_amount -= quantity

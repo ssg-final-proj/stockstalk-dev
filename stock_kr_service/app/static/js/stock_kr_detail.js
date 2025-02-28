@@ -275,21 +275,18 @@ function updateOrderHistoryUI(orders) {
     orderList.innerHTML = ''; // 기존 목록 초기화
 
     if (orders.length === 0) {
-        orderList.innerHTML = '<tr><td colspan="5">주문 내역이 없습니다.</td></tr>';
+        orderList.innerHTML = '주문 내역이 없습니다.';
     } else {
         orders.forEach(order => {
-            const date = new Date(order.date);
-            const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-            const row = `
-                <tr>
-                    <td>${formattedTime}</td>
-                    <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
-                    <td>${order.quantity}</td>
-                    <td>${order.price}</td>
-                    <td><button class="cancel-order" data-order-id="${order.id}">취소</button></td>
-                </tr>
+            const row = document.createElement('li');
+            row.innerHTML = `
+                <span>${order.date}</span>
+                <span>${order.type === 'BUY' ? '매수' : '매도'}</span>
+                <span>${order.quantity}</span>
+                <span>${order.price}</span>
+                <button class="cancel-order" data-order-id="${order.id}">취소</button>
             `;
-            orderList.innerHTML += row;
+            orderList.appendChild(row);
         });
     }
 
@@ -301,6 +298,7 @@ function updateOrderHistoryUI(orders) {
         });
     });
 }
+
 
 // function cancelOrder(orderId) {
 //     // TODO: 주문 취소 로직 구현

@@ -150,37 +150,26 @@ body {
     padding-top: 20px;
 }
 
-.order-history table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;  /* 추가: 테이블 레이아웃 고정 */
+.order-history ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.order-history th, .order-history td {
+.order-history li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;  /* 추가: 텍스트 왼쪽 정렬 */
-    overflow: hidden;  /* 추가: 내용이 넘칠 경우 숨김 */
-    text-overflow: ellipsis;  /* 추가: 넘치는 텍스트에 ... 표시 */
-    white-space: nowrap;  /* 추가: 줄바꿈 방지 */
+    border-bottom: 1px solid #ddd;
 }
 
-/* 추가: 각 열의 너비 조정 */
-.order-history th:nth-child(1),
-.order-history td:nth-child(1) {
-    width: 30%;  /* 날짜 열 */
+.order-history li:last-child {
+    border-bottom: none;
 }
 
-.order-history th:nth-child(2),
-.order-history td:nth-child(2) {
-    width: 20%;  /* 구분 열 */
-}
-
-.order-history th:nth-child(3),
-.order-history td:nth-child(3),
-.order-history th:nth-child(4),
-.order-history td:nth-child(4) {
-    width: 25%;  /* 수량과 가격 열 */
+.order-history li span {
+    font-size: 14px;
 }
 
 .hidden {
@@ -209,7 +198,21 @@ body {
     border-bottom: 2px solid #39413f;
 }
 
-/* 추가: 반응형 디자인을 위한 미디어 쿼리 */
+.cancel-order {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e62e19;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.cancel-order:hover {
+    background-color: #e64a19;
+}
+
 @media (max-width: 768px) {
     .main-content {
         flex-direction: column;
@@ -221,28 +224,8 @@ body {
         width: 100%;
     }
 
-    .order-history th,
-    .order-history td {
+    .order-history li {
         font-size: 14px;
         padding: 8px;
     }
-}
-.order-history th:nth-child(5),
-.order-history td:nth-child(5) {
-    width: 15%;  /* 취소 버튼 열 */
-}
-
-.cancel-order {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: #e62e19; /* 빨간색 */
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.cancel-order:hover {
-    background-color: #e64a19; /* 밝은 빨간색 */
 }
