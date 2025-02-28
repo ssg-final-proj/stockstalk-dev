@@ -13,14 +13,13 @@ def get_stock_by_symbol(stock_symbol):
 
 def init_app(app, schema_name):
     db_uri = current_config.SQLALCHEMY_DATABASE_URI
-    
+
     try:
         engine = create_engine(db_uri, echo=True, pool_pre_ping=True, pool_recycle=3600)
         with engine.connect() as connection:
             # 먼저 스키마 생성
             connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema_name}"))
 
-        app.config['SQLALCHEMY_DATABASE_URI'] = f"{db_uri}/{schema_name}"
         db.init_app(app)
     except Exception as e:
         print(f"Error initializing the database: {e}")

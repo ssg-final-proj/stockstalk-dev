@@ -28,9 +28,10 @@ def create_app():
     app.config['ENV'] = config_name
     CORS(app, resources={r"/*": {"origins": "*"}})
 
-    # DB 초기화 (auth_service 스키마 사용)
-    init_app(app, current_config.AUTH_SCHEMA)
-    db.init_app(app)  # SQLAlchemy 인스턴스를 명시적으로 초기화
+    db.init_app(app)
+    with app.app_context():
+        init_app(app, current_config.AUTH_SCHEMA)
+        db.create_all()
     
     # Flask-Login 설정
     login_manager = LoginManager()
@@ -55,12 +56,8 @@ if __name__ == "__main__":
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
     app = create_app()
-    
+
     # Migrate 객체 생성
     migrate = Migrate(app, db)
-    
-    # 애플리케이션 컨텍스트 내에서 데이터베이스 초기화
-    with app.app_context():
-        db.create_all()
 
-    app.run(host="0.0.0.0", port=8001, debug=True)                                         
+    app.run(host="0.0.0.0", port=8001, debug=True)
