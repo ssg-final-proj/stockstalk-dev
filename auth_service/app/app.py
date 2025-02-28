@@ -28,7 +28,8 @@ def create_app():
     app.config['ENV'] = config_name
     CORS(app, resources={r"/*": {"origins": "*"}})
 
-    init_app(app, current_config.AUTH_SCHEMA)
+    schema_name = "auth_db"
+    init_app(app, schema_name)
     db.init_app(app)
     
     with app.app_context():
