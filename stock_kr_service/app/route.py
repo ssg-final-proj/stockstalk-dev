@@ -11,7 +11,7 @@ from auth import create_broker
 
 # 증권 API 브로커 생성
 broker = create_broker()
-CACHE_DURATION = 10
+CACHE_DURATION = 60
 STOCK_CODES = [
     "005930", "000660", "005380", "035420", "207940", "051910", "068270", "000270",
     "105560", "012330", "036570", "015760", "055550", "017670", "018260", "032830",
@@ -102,7 +102,7 @@ async def fetch_stock_data(code, broker, symbols, redis_client_stock=None):
 
 async def fetch_all_stock_data(redis_client_stock=None):
     broker, symbols = initialize_broker_and_symbols()
-    semaphore = asyncio.Semaphore(20)  # 동시에 최대 20개의 작업만 실행되도록 제한
+    semaphore = asyncio.Semaphore(30)  # 동시에 최대 30개의 작업만 실행되도록 제한
 
     async def limited_fetch_stock_data(code):
         async with semaphore:
