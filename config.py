@@ -8,23 +8,28 @@ class Config:
         'pool_pre_ping': True,
         'pool_recycle': 280,
     }
-    
-    REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+
+    REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
     REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
     CACHE_DURATION = int(os.getenv('CACHE_DURATION', 100))
-    KAFKA_BROKER_HOST = os.getenv('KAFKA_BROKER_HOST', 'localhost:9092')
-    
+    KAFKA_BROKER_HOST = os.getenv('KAFKA_BROKER_HOST', 'kafka:9092')
+
     base_dir = os.path.abspath(os.path.dirname(__file__))
     project_root = os.path.abspath(os.path.join(base_dir, '..'))
-    
-    DB_NAME = os.environ.get('DB_NAME')
+
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    
+    SQLALCHEMY_BINDS = {
+        'auth': os.getenv('DATABASE_URL') + '/' + os.getenv('AUTH_SCHEMA', 'auth_db'),
+        'portfolio': os.getenv('DATABASE_URL') + '/' + os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db'),
+        'exchange': os.getenv('DATABASE_URL') + '/' + os.getenv('EXCHANGE_SCHEMA', 'exchange_db'),
+        'stock': os.getenv('DATABASE_URL') + '/' + os.getenv('STOCK_SCHEMA', 'stock_db')
+    }
+
     # 스키마 설정 추가
     AUTH_SCHEMA = os.getenv('AUTH_SCHEMA', 'auth_db')
     EXCHANGE_SCHEMA = os.getenv('EXCHANGE_SCHEMA', 'exchange_db')
     PORTFOLIO_SCHEMA = os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db')
-    STOCK_SCHEMA = os.getenv('STOCK_SCHEMA', 'stock_db') # STOCK_SCHEMA 추가
+    STOCK_SCHEMA = os.getenv('STOCK_SCHEMA', 'stock_db')
 
     KOREA_INVESTMENT_KEY_PATH = os.path.join(project_root, os.getenv('KOREA_INVESTMENT_KEY_PATH', ''))
 

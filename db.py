@@ -1,8 +1,7 @@
 import pymysql
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, text, ForeignKey
-from config import current_config, ENV
-import os
+from config import current_config
 
 pymysql.install_as_MySQLdb()
 
@@ -12,20 +11,17 @@ def get_stock_by_symbol(stock_symbol):
     return Stock.query.filter_by(stock_symbol=stock_symbol).first()
 
 def init_app(app, schema_name):
-    db_uri = current_config.SQLALCHEMY_DATABASE_URI
-
     try:
-        engine = create_engine(db_uri, echo=True, pool_pre_ping=True, pool_recycle=3600)
+        engine = db.get_engine(app, bind=None)
         with engine.connect() as connection:
-            # 먼저 스키마 생성
-            connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema_name}"))
+            connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS `{schema_name}`"))
 
-        db.init_app(app)
     except Exception as e:
         print(f"Error initializing the database: {e}")
 
 class User(db.Model):
     __tablename__ = 'users'
+    __bind_key__ = 'users'
     __table_args__ = {"schema": current_config.AUTH_SCHEMA}
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -40,7 +36,8 @@ class User(db.Model):
 
 class Stock(db.Model):
     __tablename__ = 'stocks'
-    __table_args__ = {"schema": current_config.PORTFOLIO_SCHEMA}  # stock 테이블을 portfolio 스키마로 이동
+    __bind_key__ = 'stocks'
+    __table_args__ = {"schema": current_config.STOCK_SCHEMA}
 
     id = db.Column(db.Integer, primary_key=True)
     stock_symbol = db.Column(db.String(50), nullable=False, unique=True)
@@ -49,18 +46,18 @@ class Stock(db.Model):
 
 class Portfolio(db.Model):
     __tablename__ = 'portfolios'
+    __bind_key__ = 'portfolios'
     __table_args__ = {"schema": current_config.PORTFOLIO_SCHEMA}
 
     id = db.Column(db.Integer, primary_key=True)
     kakao_id = db.Column(db.String(20), nullable=False)
-    stock_symbol = db.Column(db.String(50), db.ForeignKey(f"{current_config.PORTFOLIO_SCHEMA}.stocks.stock_symbol", ondelete="CASCADE"), nullable=False)
+    stock_symbol = db.Column(db.String(50), db.ForeignKey(f"{current_config.STOCK_SCHEMA}.stocks.stock_symbol", ondelete="CASCADE"), nullable=False)
     stock_amount = db.Column(db.Float, default=0.0)
     total_value = db.Column(db.Float, default=0.0)
     initial_investment = db.Column(db.Float, default=0.0)
     p_rank = db.Column(db.Integer, nullable=True)
-    profit_rate = db.Column(db.Float, default=0.0)  # 수익률 컬럼 추가
+    profit_rate = db.Column(db.Float, default=0.0)
 
-    # 복합 인덱스 추가
     __table_args__ = (
         db.Index('idx_kakao_id_stock_symbol', 'kakao_id', 'stock_symbol'),
         {"schema": current_config.PORTFOLIO_SCHEMA}
@@ -68,11 +65,12 @@ class Portfolio(db.Model):
 
 class Order(db.Model):
     __tablename__ = 'orders'
+    __bind_key__ = 'orders'
     __table_args__ = {"schema": current_config.PORTFOLIO_SCHEMA}
 
     id = db.Column(db.Integer, primary_key=True)
     kakao_id = db.Column(db.String(20), nullable=False)
-    stock_symbol = db.Column(db.String(50), db.ForeignKey(f"{current_config.PORTFOLIO_SCHEMA}.stocks.stock_symbol", ondelete="CASCADE"), nullable=False)
+    stock_symbol = db.Column(db.String(50), db.ForeignKey(f"{current_config.STOCK_SCHEMA}.stocks.stock_symbol", ondelete="CASCADE"), nullable=False)
     order_type = db.Column(db.Enum('BUY', 'SELL', name='order_type_enum'), nullable=False)
     target_price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
@@ -82,6 +80,7 @@ class Order(db.Model):
 
 class Exchange(db.Model):
     __tablename__ = 'exchanges'
+    __bind_key__ = 'exchanges'
     __table_args__ = {"schema": current_config.EXCHANGE_SCHEMA}
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
