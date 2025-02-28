@@ -234,16 +234,17 @@ async function submitOrder(orderType) {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || '주문 처리 중 오류 발생');
+            displayAlert(errorData.error || '주문 처리 중 오류 발생', 'error');
+            return;
         }
 
         const result = await response.json();
-        displaySuccess(result.message || '주문이 성공적으로 처리되었습니다.');  // 성공 메시지 표시
+        displayAlert(result.message || '주문이 성공적으로 처리되었습니다.', 'success');
         fetchOrderHistory(currentStockCode); // 주문 성공 후 주문 내역 업데이트
 
     } catch (error) {
         console.error('주문 처리 중 오류 발생:', error);
-        showError(error.message || '주문 처리 중 오류가 발생했습니다.'); // 오류 메시지 표시
+        displayAlert(error.message || '주문 처리 중 오류가 발생했습니다.', 'error');
     } finally {
         isOrderProcessing = false;
     }
@@ -271,13 +272,15 @@ async function fetchOrderHistory(stockCode) {
     try {
         const response = await fetch(`http://3.34.97.76:8003/api/order-history?code=${stockCode}&kakao_id=${kakaoId}`);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            displayAlert(`HTTP error! status: ${response.status}`, 'error');
+            return;
         }
         const data = await response.json();
         console.log("[DEBUG] 주문 내역 데이터 수신:", data);
         updateOrderHistoryUI(data);
     } catch (error) {
         console.error('주문 내역을 가져오는 중 오류 발생:', error);
+        displayAlert('주문 내역을 가져오는 중 오류 발생', 'error');
         updateOrderHistoryUI([]);  // 오류 발생 시 빈 배열로 UI 업데이트
     }
 }
@@ -341,30 +344,44 @@ function updateOrderHistory(orderData) {
     `;
     orderList.insertBefore(newRow, orderList.firstChild);
 }
-// 오류 메시지 표시 함수
-function showError(message) {
-    const errorMessageElement = document.getElementById('error-message');
-     // Check if errorMessageElement exists before setting textContent
-    if (errorMessageElement) {
-        errorMessageElement.textContent = message;
-        errorMessageElement.style.display = 'block';
-    } else {
-        console.error('Error message element not found.');
-    }
+
+// 경고 메시지 표시 함수 (팝업 창)
+function displayAlert(message, type) {
+    const alertBox = document.createElement('div');
+    alertBox.className = `alert ${type}`;
+    alertBox.textContent = message;
+
+    // 스타일을 직접 설정
+    alertBox.style.position = 'fixed';
+    alertBox.style.top = '10%';
+    alertBox.style.left = '50%';
+    alertBox.style.transform = 'translateX(-50%)';
+    alertBox.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
+    alertBox.style.color = type === 'success' ? '#155724' : '#721c24';
+    alertBox.style.padding = '20px';
+    alertBox.style.borderRadius = '5px';
+    alertBox.style.zIndex = '1000';
+    alertBox.style.textAlign = 'center';
+    alertBox.style.fontSize = '16px';
+    alertBox.style.border = type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
+    alertBox.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+
+    document.body.appendChild(alertBox);
+
+    setTimeout(() => {
+        document.body.removeChild(alertBox);
+    }, 3000); // 3초 후 사라짐
 }
 
-// 성공 메시지 표시 함수
+// 오류 메시지 표시 함수 (사용하지 않음)
+function showError(message) {
+    console.error(message);
+    displayAlert(message, 'error');
+}
+
+// 성공 메시지 표시 함수 (사용하지 않음)
 function displaySuccess(message) {
-    const successMessageElement = document.getElementById('success-message');
-    if (successMessageElement){
-        successMessageElement.textContent = message;
-        successMessageElement.style.display = 'block';
-        setTimeout(() => {
-            successMessageElement.style.display = 'none';
-        }, 3000); // 3초 후 메시지 숨김
-    } else {
-         console.error('success message element not found.');
-    }
+    displayAlert(message, 'success');
 }
 
 function getCookie(name) {

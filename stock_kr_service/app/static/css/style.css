@@ -1,182 +1,263 @@
-/* 기본 스타일 설정 */
 body {
     font-family: 'Noto Sans KR', sans-serif;
     background-color: #f8f9fa;
     margin: 0;
     padding: 0;
+    color: #343a40;
 }
 
-header {
-    background-color: #2d3e50;
-    color: #fff;
-    padding: 55px 0px 20px 0px; /* 상하 패딩을 40px로 늘림 */
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-}
-
-.header-content {
-    max-width: 1200px;
+.container {
+    width: 90%;
     margin: 0 auto;
-    padding: 0 0px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 90px; /* 헤더의 최소 높이 설정 */
+    max-width: 1200px;
+    padding: 2%;
 }
 
-header h1 {
+.header {
+    text-align: center;
+    margin-bottom: 2%;
+}
+
+.header h1 {
+    font-size: 2em;
     margin: 0;
-    font-size: 2rem;
+    color: #39413f;
 }
 
-.button-container {
+.header p {
+    font-size: 1.2em;
+    color: #39413f;
+}
+
+.main-content {
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap; /* 버튼이 겹치지 않도록 조정 */
-    gap: 10px; /* 버튼 간격 */
+    gap: 2%;
 }
 
-.navbar-left, .navbar-right {
+.chart-and-orderbook {
+    flex: 3;
+}
+
+.chart-section,
+.orderbook-section {
+    padding: 2%;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+#chart,
+#order-book-chart {
+    max-width: 100%;
+}
+
+.order-section {
+    flex: 1;
+    padding: 2%;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.order-buttons {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap; /* 버튼이 줄 바꿈되도록 조정 */
+    justify-content: space-between;
+    margin-bottom: 2%;
 }
 
-.button {
-    background-color: #2d3e50;
-    padding: 10px 20px;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 4px;
+.order-toggle {
+    padding: 2% 5%;
+    font-size: 1em;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
     transition: background-color 0.3s;
-    font-size: 0.9rem;
+    background-color: transparent;
+    border: 2px solid;
 }
 
-.button:hover {
-    background-color: #1c2a38;
+.order-input {
+    margin-bottom: 2%;
 }
 
-main {
-    max-width: 900px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
+.order-input label {
+    display: block;
+    margin-bottom: 1%;
+    font-size: 1.1em;
 }
 
-h2 {
-    color: #2d3e50;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
+.order-input input {
+    width: 98%;
+    padding: 2%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-table {
+.order-submit {
+    width: 100%;
+    padding: 2%;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.order-submit.buy-submit {
+    background-color: #e62e19;
+    color: white;
+}
+
+.order-submit.buy-submit:hover {
+    background-color: #e62e19;
+}
+
+.order-submit.sell-submit {
+    background-color: #039be5;
+    color: white;
+}
+
+.order-submit.sell-submit:hover {
+    background-color: #0288d1;
+}
+
+.order-history {
+    margin-top: 2%;
+    padding-top: 2%;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.order-history h2 {
+    font-size: 1.5em;
+    margin-bottom: 2%;
+}
+
+.order-history table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    table-layout: fixed;
 }
 
-table th, table td {
-    padding: 10px;
-    border: 1px solid #ddd;
-}
-
-table th.text-left {
+.order-history th,
+.order-history td {
+    padding: 2%;
     text-align: left;
+    border-bottom: 1px solid #ddd;
+    word-break: break-word;
 }
 
-table th.text-right {
-    text-align: right;
-}
-
-table td {
-    background-color: #fff;
-    text-align: right; /* 기본적으로 오른쪽 정렬 */
-}
-
-td.text-left {
-    text-align: left; /* 종목명 왼쪽 정렬 */
-}
-
-td.bold-text {
-    font-weight: bold; /* 굵은 글씨 */
-}
-
-.change {
+.order-history th {
+    position: sticky;
+    top: 0;
+    background-color: #f2f2f2;
     font-weight: bold;
+    z-index: 10;
 }
 
-.change-0 {
-    color: #888;
-    font-weight: bold;
+.order-history tbody tr:hover {
+    background-color: #f9f9f9;
 }
 
-.change-positive {
-    color: #f3443e;
-    font-weight: bold;
-}
-
-.change-negative {
-    color: #5b6fde;
-    font-weight: bold;
-}
-
-/* 종목명 링크 스타일 */
-.stock-link {
-    color: inherit;
-    text-decoration: none;
+.cancel-order {
+    padding: 1% 2%;
+    border: none;
+    border-radius: 4px;
+    background-color: #f44336;
+    color: white;
+    cursor: pointer;
+    font-size: 0.85em;
     transition: background-color 0.3s;
 }
 
-.stock-link:hover {
-    background-color: #e0e0e0; /* 배경색이 진해짐 */
+.cancel-order:hover {
+    background-color: #d32f2f;
 }
 
-/* 반응형 스타일 */
+.hidden {
+    display: none;
+}
+
+.toggle-section {
+    display: flex;
+    justify-content: flex-start;
+    gap: 2%;
+    margin-bottom: 2%;
+}
+
+.toggle-button {
+    padding: 1% 2%;
+    border: none;
+    background: none;
+    font-size: 1.1em;
+    cursor: pointer;
+    outline: none;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom 0.3s;
+}
+
+.order-history th:nth-child(1),
+.order-history td:nth-child(1) {
+    width: 20%;
+}
+
+.order-history th:nth-child(2),
+.order-history td:nth-child(2) {
+    width: 15%;
+}
+
+.order-history th:nth-child(3),
+.order-history td:nth-child(3) {
+    width: 15%;
+}
+
+.order-history th:nth-child(4),
+.order-history td:nth-child(4) {
+    width: 20%;
+}
+
+.order-history th:nth-child(5),
+.order-history td:nth-child(5) {
+    width: 30%;
+    text-align: center;
+}
+
 @media (max-width: 768px) {
-    header h1 {
-        font-size: 1.5rem;
+    .container {
+        width: 95%;
+        padding: 1%;
     }
 
-    .button {
-        padding: 8px 15px;
-        font-size: 0.8rem;
+    .main-content {
+        flex-direction: column;
+        gap: 1%;
     }
 
-    .button-container {
-        flex-direction: column; /* 버튼을 세로로 정렬 */
-        align-items: center;
+    .chart-and-orderbook,
+    .order-section {
+        flex: none;
+        width: 100%;
+        padding: 1%;
     }
 
-    main {
-        padding: 10px;
+    .order-buttons {
+        flex-direction: column;
+        gap: 1%;
     }
 
-    table {
-        font-size: 0.8rem;
+    .order-toggle {
+        padding: 2% 4%;
+        font-size: 0.9em;
     }
 
-    table th, table td {
-        padding: 5px;
-    }
-}
-
-@media (max-width: 480px) {
-    .button-container {
-        gap: 5px;
-    }
-
-    table {
-        font-size: 0.7rem;
-    }
-
-    table th, table td {
-        padding: 3px;
-    }
-
-    main {
-        margin: 10px;
+    .order-history {
+        max-height: 250px;
+        padding-top: 1%;
     }
 }
