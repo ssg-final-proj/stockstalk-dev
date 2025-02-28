@@ -289,40 +289,45 @@ def process_buy_order(event, session, user_data, current_price, order, portfolio
 
     user_seed_krw = float(user_data.get('seed_krw', 0))
 
+    logger.info(f"Checking BUY order conditions: user_seed_krw={user_seed_krw}, total_cost={total_cost}, order.target_price={order.target_price}, current_price={current_price}")
+
     if user_seed_krw >= total_cost and order.target_price >= current_price:
-        if not portfolio_entry:
-            portfolio_entry = Portfolio(
-                kakao_id=kakao_id,
-                stock_symbol=stock_symbol,
-                stock_amount=quantity,
-                total_value=total_cost,
-                initial_investment=total_cost,
-                profit_rate=0.0
-            )
-            session.add(portfolio_entry)
-        else:
-            portfolio_entry.stock_amount += quantity
-            portfolio_entry.total_value = current_price * portfolio_entry.stock_amount
-            portfolio_entry.initial_investment += total_cost
+        logger.info("BUY order conditions met.")
 
-        user_seed_krw -= total_cost
-        user_data['seed_krw'] = user_seed_krw
-        redis_client_user.set(f'session:{kakao_id}', json.dumps(user_data), ex=86400)
+        if user_seed_krw >= total_cost and order.target_price >= current_price:
+            if not portfolio_entry:
+                portfolio_entry = Portfolio(
+                    kakao_id=kakao_id,
+                    stock_symbol=stock_symbol,
+                    stock_amount=quantity,
+                    total_value=total_cost,
+                    initial_investment=total_cost,
+                    profit_rate=0.0
+                )
+                session.add(portfolio_entry)
+            else:
+                portfolio_entry.stock_amount += quantity
+                portfolio_entry.total_value = current_price * portfolio_entry.stock_amount
+                portfolio_entry.initial_investment += total_cost
 
-        order.status = 'COMPLETED'
-        order.completed_at = get_kst_now()  # 한국 시간으로 설정
-        logger.info(f"BUY order processed successfully for kakao_id: {kakao_id}, stock: {stock_symbol}")
+            user_seed_krw -= total_cost
+            user_data['seed_krw'] = user_seed_krw
+            redis_client_user.set(f'session:{kakao_id}', json.dumps(user_data), ex=86400)
 
-        update_user_in_auth_service(kakao_id, user_seed_krw)
+            order.status = 'COMPLETED'
+            order.completed_at = get_kst_now()  # 한국 시간으로 설정
+            logger.info(f"BUY order processed successfully for kakao_id: {kakao_id}, stock: {stock_symbol}")
 
-        if portfolio_entry.initial_investment > 0:
-            profit_rate = ((current_price * portfolio_entry.stock_amount) - portfolio_entry.initial_investment) / portfolio_entry.initial_investment * 100
-        else:
-            profit_rate = 0
-        redis_client_profit.set(f'profit_rate:{kakao_id}:{stock_symbol}', profit_rate)
-        portfolio_entry.profit_rate = profit_rate  # DB에도 저장
+            update_user_in_auth_service(kakao_id, user_seed_krw)
+
+            if portfolio_entry.initial_investment > 0:
+                profit_rate = ((current_price * portfolio_entry.stock_amount) - portfolio_entry.initial_investment) / portfolio_entry.initial_investment * 100
+            else:
+                profit_rate = 0
+            redis_client_profit.set(f'profit_rate:{kakao_id}:{stock_symbol}', profit_rate)
+            portfolio_entry.profit_rate = profit_rate  # DB에도 저장
     else:
-        logger.info(f"BUY order conditions not met for kakao_id: {kakao_id}, stock: {stock_symbol}")
+        logger.info(f"BUY order conditions not met for kakao_id: {kakao_id}, stock: {stock_symbol}. user_seed_krw >= total_cost is {user_seed_krw >= total_cost}, order.target_price >= current_price is {order.target_price >= current_price}")
 
 def process_sell_order(event, session, user_data, current_price, order, portfolio_entry):
     kakao_id = event['kakao_id']
