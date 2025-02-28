@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
     currentStockCode = new URLSearchParams(window.location.search).get('code');
     if (!currentStockCode) {
         console.error('주식 코드가 없습니다.');
-        displayAlert('주식 코드를 찾을 수 없습니다.', 'error');
+        showError('주식 코드를 찾을 수 없습니다.');
         return; // code가 없을 경우 여기서 중단
     }
 
@@ -73,9 +73,6 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(() => {
         fetchAndUpdateStockDetail(currentStockCode);
     }, 5000);
-
-     // 페이지 로드시 매수 버튼 활성화 및 해당 폼 보이도록 설정
-    toggleOrderForm('BUY');
 });
 
 // 주식 상세 정보 가져오기
@@ -91,7 +88,7 @@ async function fetchAndUpdateStockDetail(stockCode) {
 
         if (data.error) {
             console.error('주식 데이터 오류:', data.error);
-            displayAlert(data.error, 'error');
+            showError(data.error);
             return;
         }
 
@@ -99,7 +96,7 @@ async function fetchAndUpdateStockDetail(stockCode) {
         updateUI(data);
     } catch (error) {
         console.error('주식 상세 정보를 가져오는 중 오류 발생:', error);
-        displayAlert('주식 데이터를 가져오는 중 오류가 발생했습니다.', 'error');
+        showError('주식 데이터를 가져오는 중 오류가 발생했습니다.');
     }
 }
 
@@ -117,7 +114,7 @@ function updateUI(data) {
         stockInfoElement.innerHTML = `<span style="color: ${stockColor}">${stock.price || 0}원 (${stockChange}원, ${stock.percent_change || 0}%)</span>`;
         updateChart(stock.chart_data || {});
     } else {
-        displayAlert('해당 종목에 대한 데이터를 찾을 수 없습니다.', 'error');
+        showError('해당 종목에 대한 데이터를 찾을 수 없습니다.');
     }
 }
 
@@ -132,14 +129,10 @@ function updateChart(chartData) {
 
     const transformedData = {
         x: chartData.timestamps,
-        open: transformedData.open.map(Number),
-        high: transformedData.high.map(Number),
-        low: transformedData.low,
-        close: transformedData.close,
-        type: 'candlestick',
-        name: '캔들 차트',
-        increasing: { line: { color: 'rgb(200, 0, 0)' } },
-        decreasing: { line: { color: 'rgb(0, 113, 200)' } }
+        open: chartData.open.map(Number),
+        high: chartData.high.map(Number),
+        low: chartData.low.map(Number),
+        close: chartData.close.map(Number)
     };
 
     const trace1 = {
@@ -185,13 +178,17 @@ function toggleOrderForm(orderType) {
     const sellToggle = document.getElementById('sell-toggle');
 
     if (orderType === 'BUY') {
+        buyForm.classList.add('active');
         buyForm.classList.remove('hidden');
+        sellForm.classList.remove('active');
         sellForm.classList.add('hidden');
         buyToggle.classList.add('active');
         sellToggle.classList.remove('active');
     } else {
+        buyForm.classList.remove('active');
         buyForm.classList.add('hidden');
-        sellForm.classList.remove('active');
+        sellForm.classList.add('active');
+        sellForm.classList.remove('hidden');
         buyToggle.classList.remove('active');
         sellToggle.classList.add('active');
     }
@@ -209,13 +206,13 @@ async function submitOrder(orderType) {
     const price = document.getElementById(`${orderType.toLowerCase()}-price`).value;
 
     if (!currentStockCode) {
-        displayAlert('주식 코드를 찾을 수 없습니다.', 'error');
+        showError('주식 코드를 찾을 수 없습니다.');
         return;
     }
 
     const kakaoId = getCookie('kakao_id');
     if (!kakaoId) {
-        displayAlert('로그인이 필요합니다.', 'error');
+        showError('로그인이 필요합니다.');
         window.location.href = '/login';
         return;
     }
@@ -237,24 +234,16 @@ async function submitOrder(orderType) {
 
         if (!response.ok) {
             const errorData = await response.json();
-            displayAlert(errorData.error || '주문 처리 중 오류 발생', 'error');
-            return;
+            throw new Error(errorData.error || '주문 처리 중 오류 발생');
         }
 
         const result = await response.json();
-        displayAlert(result.message || '주문이 성공적으로 처리되었습니다.', 'success');
-        
-        // 주문 성공 후 주문 내역 업데이트 (Socket.IO 사용)
-        socket.emit('order_update', {
-            date: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }),
-            type: orderType,
-            quantity: quantity,
-            price: price
-        });
+        displaySuccess(result.message || '주문이 성공적으로 처리되었습니다.');  // 성공 메시지 표시
+        fetchOrderHistory(currentStockCode); // 주문 성공 후 주문 내역 업데이트
 
     } catch (error) {
         console.error('주문 처리 중 오류 발생:', error);
-        displayAlert(error.message || '주문 처리 중 오류가 발생했습니다.', 'error');
+        showError(error.message || '주문 처리 중 오류가 발생했습니다.'); // 오류 메시지 표시
     } finally {
         isOrderProcessing = false;
     }
@@ -282,15 +271,13 @@ async function fetchOrderHistory(stockCode) {
     try {
         const response = await fetch(`http://3.34.97.76:8003/api/order-history?code=${stockCode}&kakao_id=${kakaoId}`);
         if (!response.ok) {
-            displayAlert(`HTTP error! status: ${response.status}`, 'error');
-            return;
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         console.log("[DEBUG] 주문 내역 데이터 수신:", data);
         updateOrderHistoryUI(data);
     } catch (error) {
         console.error('주문 내역을 가져오는 중 오류 발생:', error);
-        displayAlert('주문 내역을 가져오는 중 오류 발생', 'error');
         updateOrderHistoryUI([]);  // 오류 발생 시 빈 배열로 UI 업데이트
     }
 }
@@ -305,23 +292,25 @@ function updateOrderHistoryUI(orders) {
 
     if (orders.length === 0) {
         const emptyRow = document.createElement('tr');
-        emptyRow.innerHTML = '<td colspan="5">주문 내역이 없습니다.</td>';
+        emptyRow.innerHTML = '<td colspan="4">주문 내역이 없습니다.</td>';
         orderList.appendChild(emptyRow);
     } else {
         orders.forEach(order => {
             const row = document.createElement('tr');
-            // 시간 형식을 시:분 으로 변경
-            const formattedDate = new Date(order.date).toLocaleTimeString('ko-KR', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false // 24시간 형식 사용
-            });
             row.innerHTML = `
-                <td>${formattedDate}</td>
+                <td>${order.date}</td>
                 <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
                 <td>${order.quantity}</td>
                 <td>${order.price}</td>
             `;
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'cancel-order';
+            cancelButton.textContent = '취소';
+            cancelButton.dataset.orderId = order.id;
+            cancelButton.addEventListener('click', () => {
+                cancelOrder(order.id);
+            });
+            row.appendChild(cancelButton);
             orderList.appendChild(row);
         });
     }
@@ -335,8 +324,7 @@ socket.on('connect', function() {
 
 socket.on('order_update', function(data) {
     console.log('주문 업데이트 수신:', data);
-    //updateOrderHistory(data);
-    fetchOrderHistory(currentStockCode);
+    updateOrderHistory(data);
 });
 
 // 새로운 updateOrderHistory 함수를 추가합니다:
@@ -354,44 +342,30 @@ function updateOrderHistory(orderData) {
     `;
     orderList.insertBefore(newRow, orderList.firstChild);
 }
-
-// 경고 메시지 표시 함수 (팝업 창)
-function displayAlert(message, type) {
-    const alertBox = document.createElement('div');
-    alertBox.className = `alert ${type}`;
-    alertBox.textContent = message;
-
-    // 스타일을 직접 설정
-    alertBox.style.position = 'fixed';
-    alertBox.style.top = '10%';
-    alertBox.style.left = '50%';
-    alertBox.style.transform = 'translateX(-50%)';
-    alertBox.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
-    alertBox.style.color = type === 'success' ? '#155724' : '#721c24';
-    alertBox.style.padding = '20px';
-    alertBox.style.borderRadius = '5px';
-    alertBox.style.zIndex = '1000';
-    alertBox.style.textAlign = 'center';
-    alertBox.style.fontSize = '16px';
-    alertBox.style.border = type === 'success' ? '1px solid #c3e6cb' : '1px solid #f5c6cb';
-    alertBox.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-
-    document.body.appendChild(alertBox);
-
-    setTimeout(() => {
-        document.body.removeChild(alertBox);
-    }, 3000); // 3초 후 사라짐
-}
-
-// 오류 메시지 표시 함수 (사용하지 않음)
+// 오류 메시지 표시 함수
 function showError(message) {
-    console.error(message);
-    displayAlert(message, 'error');
+    const errorMessageElement = document.getElementById('error-message');
+     // Check if errorMessageElement exists before setting textContent
+    if (errorMessageElement) {
+        errorMessageElement.textContent = message;
+        errorMessageElement.style.display = 'block';
+    } else {
+        console.error('Error message element not found.');
+    }
 }
 
-// 성공 메시지 표시 함수 (사용하지 않음)
+// 성공 메시지 표시 함수
 function displaySuccess(message) {
-    displayAlert(message, 'success');
+    const successMessageElement = document.getElementById('success-message');
+    if (successMessageElement){
+        successMessageElement.textContent = message;
+        successMessageElement.style.display = 'block';
+        setTimeout(() => {
+            successMessageElement.style.display = 'none';
+        }, 3000); // 3초 후 메시지 숨김
+    } else {
+         console.error('success message element not found.');
+    }
 }
 
 function getCookie(name) {
