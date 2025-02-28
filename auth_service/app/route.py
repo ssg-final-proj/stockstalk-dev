@@ -125,7 +125,7 @@ def kakaoLoginLogicRedirect():
         response = redirect(STOCK_SERVICE_URL)  # 닉네임이 설정된 경우 stock_kr.html로 리다이렉트
     
     # response.set_cookie("kakao_id", user_to_store.kakao_id, max_age=86400)  # 24시간 동안 쿠키 유지
-    response.set_cookie("kakao_id", user_to_store.kakao_id, max_age=86400, samesite='None', secure=True)
+    response.set_cookie("kakao_id", user_to_store.kakao_id, max_age=86400, samesite='None', secure=False)
 
     print(f"✅ 쿠키 설정 완료: {user_to_store.kakao_id}")
     return response
