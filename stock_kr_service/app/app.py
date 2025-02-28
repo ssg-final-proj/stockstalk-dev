@@ -155,6 +155,7 @@ def create_app():
         
     app.config['REDIS_CLIENT_STOCK'] = redis_client_stock
     app.config['REDIS_CLIENT_USER'] = redis_client_user
+    app.config['CACHE_DURATION'] = CACHE_DURATION
 
     # SocketIO 초기화 (전역으로 이동)
     global socketio

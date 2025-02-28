@@ -292,25 +292,24 @@ function updateOrderHistoryUI(orders) {
 
     if (orders.length === 0) {
         const emptyRow = document.createElement('tr');
-        emptyRow.innerHTML = '<td colspan="4">주문 내역이 없습니다.</td>';
+        emptyRow.innerHTML = '<td colspan="5">주문 내역이 없습니다.</td>';
         orderList.appendChild(emptyRow);
     } else {
         orders.forEach(order => {
             const row = document.createElement('tr');
+            // 시간 형식을 시:분 으로 변경
+            const formattedDate = new Date(order.date).toLocaleTimeString('ko-KR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false // 24시간 형식 사용
+            });
             row.innerHTML = `
-                <td>${order.date}</td>
+                <td>${formattedDate}</td>
                 <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
                 <td>${order.quantity}</td>
                 <td>${order.price}</td>
+                <td class="cancel-button-cell"><button class="cancel-order" data-order-id="${order.id}">취소</button></td>
             `;
-            const cancelButton = document.createElement('button');
-            cancelButton.className = 'cancel-order';
-            cancelButton.textContent = '취소';
-            cancelButton.dataset.orderId = order.id;
-            cancelButton.addEventListener('click', () => {
-                cancelOrder(order.id);
-            });
-            row.appendChild(cancelButton);
             orderList.appendChild(row);
         });
     }
