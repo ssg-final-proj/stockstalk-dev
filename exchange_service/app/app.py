@@ -23,20 +23,17 @@ from config import config  # config 모듈 가져오기
 from route import exchange  # 기존 auth 대신 exchange 블루프린트 등록
 
 def create_app():
-    """ Flask 애플리케이션 생성 및 설정 """
     app = Flask(__name__)
+    config_name = os.getenv('FLASK_ENV', 'development')
+    app.config.from_object(config[config_name])
+    app.config['ENV'] = config_name
     CORS(app, resources={r"/*": {"origins": "*"}})
-    
-    # ✅ 환경 설정
-    env = os.getenv('FLASK_ENV', 'default')
-    app.config.from_object(config[env])
-    app.config['SQLALCHEMY_DATABASE_URI'] = config[env].SQLALCHEMY_DATABASE_URI
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['ENV'] = env  # Flask 환경 설정
 
-    # ✅ DB 초기화
-    init_app(app, current_config.EXCHANGE_SCHEMA)
-    migrate = Migrate(app, db)
+    db.init_app(app)
+
+    with app.app_context():
+        init_app(app, current_config.EXCHANGE_SCHEMA)
+        db.create_all()
 
     # ✅ 블루프린트 등록 (exchange 블루프린트 추가)
     app.register_blueprint(exchange)

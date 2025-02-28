@@ -47,16 +47,16 @@ KST = pytz.timezone('Asia/Seoul')
 
 def create_app():
     app = Flask(__name__)
-    env = os.getenv('FLASK_ENV', 'default')
-    app.config.from_object(config[env])
-    app.config['SQLALCHEMY_DATABASE_URI'] = config[env].SQLALCHEMY_DATABASE_URI
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['ENV'] = env
-
+    config_name = os.getenv('FLASK_ENV', 'development')
+    app.config.from_object(config[config_name])
+    app.config['ENV'] = config_name
     CORS(app, resources={r"/*": {"origins": "*"}})
 
-    init_app(app, current_config.PORTFOLIO_SCHEMA)
-    migrate.init_app(app, db, include_schemas=True)
+    db.init_app(app)
+
+    with app.app_context():
+        init_app(app, current_config.PORTFOLIO_SCHEMA)
+        db.create_all()
 
     app.register_blueprint(portfolio)
 
