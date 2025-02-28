@@ -152,17 +152,18 @@ body {
 
 .order-history table {
     width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.order-history th,
-.order-history td {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+  .order-history th, .order-history td {
     padding: 10px;
-    border: 1px solid #ddd;
     text-align: left;
-    word-break: break-all;
-}
+    border: none;
+  }
+  .order-history tr {
+    background-color: #f8f9fa;
+  }
+
 
 .order-history th:nth-child(1),
 .order-history td:nth-child(1) {
@@ -238,7 +239,8 @@ body {
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s;
-}
+    float: right;
+  }
 
 .cancel-order:hover {
     background-color: #e64a19;
