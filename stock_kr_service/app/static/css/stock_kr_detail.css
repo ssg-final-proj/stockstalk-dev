@@ -1,74 +1,73 @@
-
 body {
     font-family: 'Noto Sans KR', sans-serif;
     background-color: #f8f9fa;
     margin: 0;
     padding: 0;
     color: #343a40;
-    }
-    
-    .container {
+}
+
+.container {
     width: 90%;
     margin: 0 auto;
     max-width: 1200px;
     padding: 20px;
-    }
-    
-    .header {
+}
+
+.header {
     text-align: center;
     margin-bottom: 20px;
-    }
-    
-    .header h1 {
+}
+
+.header h1 {
     font-size: 2em;
     margin: 0;
     color: #39413f;
-    }
-    
-    .header p {
+}
+
+.header p {
     font-size: 1.2em;
     color: #39413f;
-    }
-    
-    .main-content {
+}
+
+.main-content {
     display: flex;
     justify-content: space-between;
     gap: 20px;
-    }
-    
-    .chart-and-orderbook {
+}
+
+.chart-and-orderbook {
     flex: 3;
-    }
-    
-    .chart-section,
-    .orderbook-section {
+}
+
+.chart-section,
+.orderbook-section {
     padding: 20px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    }
-    
-    #chart,
-    #order-book-chart {
+}
+
+#chart,
+#order-book-chart {
     max-width: 100%;
-    }
-    
-    .order-section {
+}
+
+.order-section {
     flex: 1;
     padding: 20px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .order-buttons {
+}
+
+.order-buttons {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
-    }
-    
-    .order-toggle {
+}
+
+.order-toggle {
     padding: 10px 30px;
     font-size: 1em;
     cursor: pointer;
@@ -77,48 +76,48 @@ body {
     transition: background-color 0.3s;
     background-color: transparent;
     border: 2px solid;
-    }
-    
-    .order-toggle.buy {
+}
+
+.order-toggle.buy {
     border-color: #e62e19;
     color: #e62e19;
-    }
-    
-    .order-toggle.sell {
+}
+
+.order-toggle.sell {
     border-color: #039be5;
     color: #039be5;
-    }
-    
-    .order-toggle.buy.active {
+}
+
+.order-toggle.buy.active {
     background-color: #e64a19;
     color: white;
-    }
-    
-    .order-toggle.sell.active {
+}
+
+.order-toggle.sell.active {
     background-color: #039be5;
     color: white;
-    }
-    
-    .order-input {
+}
+
+.order-input {
     margin-bottom: 15px;
-    }
-    
-    .order-input label {
+}
+
+.order-input label {
     display: block;
     margin-bottom: 5px;
     font-size: 1.1em;
-    }
-    
-    .order-input input {
+}
+
+.order-input input {
     width: calc(100% - 10px);
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 1em;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .order-submit {
+}
+
+.order-submit {
     width: 100%;
     padding: 10px;
     border: none;
@@ -126,111 +125,73 @@ body {
     font-size: 1.1em;
     cursor: pointer;
     transition: background-color 0.3s;
-    }
-    
-    .order-submit.buy-submit {
+}
+
+.order-submit.buy-submit {
     background-color: #e62e19;
     color: white;
-    }
-    
-    .order-submit.buy-submit:hover {
+}
+
+.order-submit.buy-submit:hover {
     background-color: #e62e19;
-    }
-    
-    .order-submit.sell-submit {
+}
+
+.order-submit.sell-submit {
     background-color: #039be5;
     color: white;
-    }
-    
-    .order-submit.sell-submit:hover {
+}
+
+.order-submit.sell-submit:hover {
     background-color: #0288d1;
-    }
-    
-    .order-history {
+}
+
+.order-history {
     margin-top: 20px;
     padding-top: 20px;
-    }
-    .order-history th:nth-child(1),
-    .order-history td:nth-child(1) {
-    width: 25%; /* 시간 */
-    }
-    
-    .order-history th:nth-child(2),
-    .order-history td:nth-child(2) {
-    width: 15%; /* 구분 */
-    }
-    
-    .order-history th:nth-child(3),
-    .order-history td:nth-child(3) {
-    width: 15%; /* 수량 */
-    }
-    
-    .order-history th:nth-child(4),
-    .order-history td:nth-child(4) {
-    width: 20%; /* 가격 */
-    }
-    
-    .order-history th:nth-child(5),
-    .order-history td:nth-child(5) {
-    width: 25%; /* 취소 */
-    }
-    
-    .order-history h2 {
+}
+
+.order-history h2 {
     font-size: 1.5em;
     margin-bottom: 10px;
-    }
-    
-    .order-history table {
+}
+
+.order-history table {
     width: 100%;
     border-collapse: collapse;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    table-layout: fixed; /* 테이블 레이아웃 고정 */
-    }
-    
-    .order-history th,
-    .order-history td {
+    table-layout: fixed;
+}
+
+.order-history th,
+.order-history td {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
-    word-break: break-all; /* 단어 단위로 줄 바꿈 */
-    }
-    
-    .order-history th {
+    word-break: break-all;
+}
+
+.order-history th {
     background-color: #f2f2f2;
     font-weight: bold;
-    }
-    
-    .order-history tbody tr:hover {
+}
+
+.order-history tbody tr:hover {
     background-color: #f9f9f9;
-    }
-    
-    .cancel-order {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    background-color: #e62e19;
-    color: white;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s;
-    }
-    
-    .cancel-order:hover {
-    background-color: #e64a19;
-    }
-    
-    .hidden {
+}
+
+
+.hidden {
     display: none;
-    }
-    
-    .toggle-section {
+}
+
+.toggle-section {
     display: flex;
     justify-content: flex-start;
     gap: 20px;
     margin-bottom: 20px;
-    }
-    
-    .toggle-button {
+}
+
+.toggle-button {
     padding: 10px 20px;
     border: none;
     background: none;
@@ -239,77 +200,92 @@ body {
     outline: none;
     border-bottom: 2px solid transparent;
     transition: border-bottom 0.3s;
-    }
-    
-    .toggle-button.active {
+}
+
+.toggle-button.active {
     border-bottom: 2px solid #39413f;
-    }
-    
-    /* 작은 화면에서의 반응형 스타일 */
-    @media (max-width: 768px) {
+}
+
+.order-history th:nth-child(1),
+.order-history td:nth-child(1) {
+    width: 20%;
+}
+
+.order-history th:nth-child(2),
+.order-history td:nth-child(2) {
+    width: 15%;
+}
+
+.order-history th:nth-child(3),
+.order-history td:nth-child(3) {
+    width: 15%;
+}
+
+.order-history th:nth-child(4),
+.order-history td:nth-child(4) {
+    width: 20%;
+}
+
+@media (max-width: 768px) {
     .container {
-    width: 95%;
-    padding: 10px;
+        width: 95%;
+        padding: 10px;
     }
-    
+
     .header h1 {
-    font-size: 1.5em;
+        font-size: 1.5em;
     }
-    
+
     .header p {
-    font-size: 1em;
+        font-size: 1em;
     }
-    
+
     .main-content {
-    flex-direction: column;
-    gap: 10px;
+        flex-direction: column;
+        gap: 10px;
     }
-    
+
     .chart-and-orderbook,
     .order-section {
-    flex: none;
-    width: 100%;
-    padding: 10px;
+        flex: none;
+        width: 100%;
+        padding: 10px;
     }
-    
+
     .order-buttons {
-    flex-direction: column;
-    gap: 10px;
+        flex-direction: column;
+        gap: 10px;
     }
-    
+
     .order-toggle {
-    padding: 8px 20px;
-    font-size: 0.9em;
+        padding: 8px 20px;
+        font-size: 0.9em;
     }
-    
+
     .order-input label {
-    font-size: 1em;
+        font-size: 1em;
     }
-    
+
     .order-input input {
-    font-size: 0.9em;
+        font-size: 0.9em;
     }
-    
+
     .order-submit {
-    font-size: 1em;
+        font-size: 1em;
     }
-    
+
     .order-history {
-    padding-top: 10px;
+        padding-top: 10px;
     }
-    
+
     .order-history h2 {
-    font-size: 1.3em;
+        font-size: 1.3em;
     }
-    
+
     .order-history th,
     .order-history td {
-    padding: 8px 10px;
-    font-size: 0.8em;
+        padding: 8px 10px;
+        font-size: 0.8em;
     }
-    
-    .cancel-order {
-    padding: 5px 8px;
-    font-size: 0.8em;
-    }
-    }
+
+}

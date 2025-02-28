@@ -282,6 +282,7 @@ async function fetchOrderHistory(stockCode) {
     }
 }
 
+// 주문 내역 업데이트 함수 수정
 function updateOrderHistoryUI(orders) {
     const orderList = document.getElementById('order-list');
     if (!orderList) {
@@ -292,29 +293,28 @@ function updateOrderHistoryUI(orders) {
 
     if (orders.length === 0) {
         const emptyRow = document.createElement('tr');
-        emptyRow.innerHTML = '<td colspan="4">주문 내역이 없습니다.</td>';
+        emptyRow.innerHTML = '<td colspan="5">주문 내역이 없습니다.</td>';
         orderList.appendChild(emptyRow);
     } else {
         orders.forEach(order => {
             const row = document.createElement('tr');
+            // 시간 형식을 시:분 으로 변경
+            const formattedDate = new Date(order.date).toLocaleTimeString('ko-KR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false // 24시간 형식 사용
+            });
             row.innerHTML = `
-                <td>${order.date}</td>
+                <td>${formattedDate}</td>
                 <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
                 <td>${order.quantity}</td>
                 <td>${order.price}</td>
             `;
-            const cancelButton = document.createElement('button');
-            cancelButton.className = 'cancel-order';
-            cancelButton.textContent = '취소';
-            cancelButton.dataset.orderId = order.id;
-            cancelButton.addEventListener('click', () => {
-                cancelOrder(order.id);
-            });
-            row.appendChild(cancelButton);
             orderList.appendChild(row);
         });
     }
 }
+
 
 const socket = io('/stock');
 
@@ -357,14 +357,14 @@ function showError(message) {
 // 성공 메시지 표시 함수
 function displaySuccess(message) {
     const successMessageElement = document.getElementById('success-message');
-    if (successMessageElement){
+    if (successMessageElement) {
         successMessageElement.textContent = message;
         successMessageElement.style.display = 'block';
         setTimeout(() => {
             successMessageElement.style.display = 'none';
         }, 3000); // 3초 후 메시지 숨김
     } else {
-         console.error('success message element not found.');
+        console.error('success message element not found.');
     }
 }
 
