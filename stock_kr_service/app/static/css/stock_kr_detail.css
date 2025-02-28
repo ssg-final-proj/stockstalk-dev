@@ -168,12 +168,12 @@ body {
 /* 추가: 각 열의 너비 조정 */
 .order-history th:nth-child(1),
 .order-history td:nth-child(1) {
-    width: 30%;  /* 날짜 열 */
+    width: 25%;  /* 날짜 열 */
 }
 
 .order-history th:nth-child(2),
 .order-history td:nth-child(2) {
-    width: 20%;  /* 구분 열 */
+    width: 25%;  /* 구분 열 */
 }
 
 .order-history th:nth-child(3),

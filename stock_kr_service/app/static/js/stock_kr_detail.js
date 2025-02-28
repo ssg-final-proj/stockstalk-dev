@@ -46,24 +46,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const sellToggle = document.getElementById('sell-toggle');
     const chartToggle = document.getElementById('chart-toggle');
     const orderbookToggle = document.getElementById('orderbook-toggle');
-    const submitBuyOrder = document.getElementById('buy-submit');
-    const submitSellOrder = document.getElementById('sell-submit');
+    const buyForm = document.getElementById('buy-form');
+    const sellForm = document.getElementById('sell-form');
 
     if (buyToggle) buyToggle.addEventListener('click', () => toggleOrderForm('BUY'));
     if (sellToggle) sellToggle.addEventListener('click', () => toggleOrderForm('SELL'));
     if (chartToggle) chartToggle.addEventListener('click', () => toggleView('chart'));
     if (orderbookToggle) orderbookToggle.addEventListener('click', () => toggleView('orderbook'));
-    
-    // 폼 제출 이벤트 핸들러를 submitOrder 함수와 연결합니다.
-    document.getElementById('buy-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        submitOrder('BUY');
-    });
 
-    document.getElementById('sell-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        submitOrder('SELL');
-    });
+    // 폼 제출 이벤트 리스너
+    if (buyForm) {
+        buyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitOrder('BUY');
+        });
+    }
+
+    if (sellForm) {
+        sellForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitOrder('SELL');
+        });
+    }
     
     // 5초마다 주식 상세 정보를 업데이트합니다.
     setInterval(() => {
@@ -228,21 +232,31 @@ async function submitOrder(orderType) {
             body: JSON.stringify(orderData)
         });
 
-        const data = await response.json();
-
-        if (data.error) {
-            showError(data.error);  // 에러 메시지 표시 방식 통일
-        } else {
-            displaySuccess(data.message);
-            fetchOrderHistory(currentStockCode);  // 성공 시 주문 내역 업데이트
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '주문 처리 중 오류 발생');
         }
+
+        const result = await response.json();
+        displaySuccess(result.message || '주문이 성공적으로 처리되었습니다.');  // 성공 메시지 표시
+        fetchOrderHistory(currentStockCode); // 주문 성공 후 주문 내역 업데이트
+
     } catch (error) {
         console.error('주문 처리 중 오류 발생:', error);
-        showError('주문 처리 중 오류가 발생했습니다.');
+        showError(error.message || '주문 처리 중 오류가 발생했습니다.'); // 오류 메시지 표시
     } finally {
         isOrderProcessing = false;
     }
 }
+
+// 폼 제출 방지 및 JavaScript로 처리
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function (event) {
+        event.preventDefault(); // 기본 제출 동작 방지
+        const orderType = form.id.includes('buy') ? 'BUY' : 'SELL';
+        submitOrder(orderType);
+    });
+});
 
 async function fetchOrderHistory(stockCode) {
     if (!stockCode) {
@@ -270,21 +284,34 @@ async function fetchOrderHistory(stockCode) {
 
 function updateOrderHistoryUI(orders) {
     const orderList = document.getElementById('order-list');
+    if (!orderList) {
+        console.error('order-list 요소를 찾을 수 없습니다.');
+        return;
+    }
     orderList.innerHTML = ''; // 기존 목록 초기화
 
     if (orders.length === 0) {
-        orderList.innerHTML = '<tr><td colspan="4">주문 내역이 없습니다.</td></tr>';
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = '<td colspan="4">주문 내역이 없습니다.</td>';
+        orderList.appendChild(emptyRow);
     } else {
         orders.forEach(order => {
-            const row = `
-                <tr>
-                    <td>${order.date}</td>
-                    <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
-                    <td>${order.quantity}</td>
-                    <td>${order.price}</td>
-                </tr>
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${order.date}</td>
+                <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
+                <td>${order.quantity}</td>
+                <td>${order.price}</td>
             `;
-            orderList.innerHTML += row;
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'cancel-order';
+            cancelButton.textContent = '취소';
+            cancelButton.dataset.orderId = order.id;
+            cancelButton.addEventListener('click', () => {
+                cancelOrder(order.id);
+            });
+            row.appendChild(cancelButton);
+            orderList.appendChild(row);
         });
     }
 }
@@ -318,18 +345,27 @@ function updateOrderHistory(orderData) {
 // 오류 메시지 표시 함수
 function showError(message) {
     const errorMessageElement = document.getElementById('error-message');
-    errorMessageElement.textContent = message;
-    errorMessageElement.style.display = 'block';
+     // Check if errorMessageElement exists before setting textContent
+    if (errorMessageElement) {
+        errorMessageElement.textContent = message;
+        errorMessageElement.style.display = 'block';
+    } else {
+        console.error('Error message element not found.');
+    }
 }
 
 // 성공 메시지 표시 함수
 function displaySuccess(message) {
     const successMessageElement = document.getElementById('success-message');
-    successMessageElement.textContent = message;
-    successMessageElement.style.display = 'block';
-    setTimeout(() => {
-        successMessageElement.style.display = 'none';
-    }, 3000); // 3초 후 메시지 숨김
+    if (successMessageElement){
+        successMessageElement.textContent = message;
+        successMessageElement.style.display = 'block';
+        setTimeout(() => {
+            successMessageElement.style.display = 'none';
+        }, 3000); // 3초 후 메시지 숨김
+    } else {
+         console.error('success message element not found.');
+    }
 }
 
 function getCookie(name) {
