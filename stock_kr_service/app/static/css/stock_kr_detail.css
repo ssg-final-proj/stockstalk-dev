@@ -150,6 +150,37 @@ body {
     padding-top: 20px;
 }
 
+.order-history table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.order-history th,
+.order-history td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    word-break: break-all;
+}
+
+.order-history th:nth-child(1),
+.order-history td:nth-child(1) {
+    width: 25%;
+}
+
+.order-history th:nth-child(2),
+.order-history td:nth-child(2) {
+    width: 15%;
+}
+
+.order-history th:nth-child(3),
+.order-history td:nth-child(3),
+.order-history th:nth-child(4),
+.order-history td:nth-child(4) {
+    width: 20%;
+}
+
 .order-history ul {
     list-style: none;
     padding: 0;

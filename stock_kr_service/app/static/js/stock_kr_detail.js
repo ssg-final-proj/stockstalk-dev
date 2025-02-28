@@ -116,10 +116,18 @@ function updateChart(chartData) {
 
     const transformedData = {
         x: chartData.timestamps,
-        open: chartData.open,
-        high: chartData.high,
-        low: chartData.low,
-        close: chartData.close,
+        open: chartData.open.map(Number),
+        high: chartData.high.map(Number),
+        low: chartData.low.map(Number),
+        close: chartData.close.map(Number)
+    };
+
+    const trace1 = {
+        x: transformedData.x,
+        open: transformedData.open,
+        high: transformedData.high,
+        low: transformedData.low,
+        close: transformedData.close,
         type: 'candlestick',
         name: '캔들 차트',
         increasing: { line: { color: 'rgb(200, 0, 0)' } },
@@ -275,28 +283,27 @@ function updateOrderHistoryUI(orders) {
     orderList.innerHTML = ''; // 기존 목록 초기화
 
     if (orders.length === 0) {
-        orderList.innerHTML = '주문 내역이 없습니다.';
+        orderList.innerHTML = '<tr><td colspan="4">주문 내역이 없습니다.</td></tr>';
     } else {
         orders.forEach(order => {
-            const row = document.createElement('li');
+            const row = document.createElement('tr');
             row.innerHTML = `
-                <span>${order.date}</span>
-                <span>${order.type === 'BUY' ? '매수' : '매도'}</span>
-                <span>${order.quantity}</span>
-                <span>${order.price}</span>
-                <button class="cancel-order" data-order-id="${order.id}">취소</button>
+                <td>${order.date}</td>
+                <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
+                <td>${order.quantity}</td>
+                <td>${order.price}</td>
             `;
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'cancel-order';
+            cancelButton.textContent = '취소';
+            cancelButton.dataset.orderId = order.id;
+            cancelButton.addEventListener('click', () => {
+                cancelOrder(order.id);
+            });
+            row.appendChild(cancelButton);
             orderList.appendChild(row);
         });
     }
-
-    // 취소 버튼에 이벤트 리스너 추가
-    document.querySelectorAll('.cancel-order').forEach(button => {
-        button.addEventListener('click', function() {
-            const orderId = this.getAttribute('data-order-id');
-            cancelOrder(orderId);
-        });
-    });
 }
 
 
