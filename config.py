@@ -19,10 +19,11 @@ class Config:
 
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_BINDS = {
-        'auth': os.getenv('DATABASE_URL') + '/' + os.getenv('AUTH_SCHEMA', 'auth_db'),
-        'portfolio': os.getenv('DATABASE_URL') + '/' + os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db'),
-        'exchange': os.getenv('DATABASE_URL') + '/' + os.getenv('EXCHANGE_SCHEMA', 'exchange_db'),
-        'stock': os.getenv('DATABASE_URL') + '/' + os.getenv('STOCK_SCHEMA', 'stock_db')
+        'users': os.getenv('DATABASE_URL') + '/' + os.getenv('AUTH_SCHEMA', 'auth_db'),
+        'stocks': os.getenv('DATABASE_URL') + '/' + os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db'),
+        'portfolios': os.getenv('DATABASE_URL') + '/' + os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db'),
+        'orders': os.getenv('DATABASE_URL') + '/' + os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db'),
+        'exchanges': os.getenv('DATABASE_URL') + '/' + os.getenv('EXCHANGE_SCHEMA', 'exchange_db')
     }
 
     # 스키마 설정 추가

@@ -15,7 +15,6 @@ def init_app(app, schema_name):
         engine = db.get_engine(app, bind=None)
         with engine.connect() as connection:
             connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS `{schema_name}`"))
-
     except Exception as e:
         print(f"Error initializing the database: {e}")
 

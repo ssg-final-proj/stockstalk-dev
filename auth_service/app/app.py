@@ -34,7 +34,7 @@ def create_app():
         db.create_all()
     
     # Flask-Login 설정
-    login_manager = LoginManager()
+    login_manager = LoginManager()       
     login_manager.init_app(app)
     app.register_blueprint(auth, url_prefix='/auth')
 
