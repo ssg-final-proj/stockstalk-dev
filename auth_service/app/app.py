@@ -30,11 +30,11 @@ def create_app():
 
     # DB 초기화 (auth_service 스키마 사용)
     init_app(app, current_config.AUTH_SCHEMA)
-    migrate = Migrate(app, db)
-    db.init_app(app)
     
     with app.app_context():
         db.create_all()  # 모든 테이블 생성
+    
+    migrate = Migrate(app, db)
     
     # Flask-Login 설정
     login_manager = LoginManager()

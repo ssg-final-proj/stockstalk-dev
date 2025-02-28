@@ -20,7 +20,7 @@ def init_app(app, schema_name):
             # 먼저 스키마 생성
             connection.execute(text(f"CREATE SCHEMA IF NOT EXISTS {schema_name}"))
 
-        app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"{db_uri}/{schema_name}"
         db.init_app(app)
     except Exception as e:
         print(f"Error initializing the database: {e}")
