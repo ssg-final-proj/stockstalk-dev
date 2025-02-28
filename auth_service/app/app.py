@@ -28,15 +28,13 @@ def create_app():
     app.config['ENV'] = config_name
     CORS(app, resources={r"/*": {"origins": "*"}})
 
-    schema_name = "auth_db"
-    init_app(app, schema_name)
     db.init_app(app)
-    
+
     with app.app_context():
+        init_app(app, current_config.AUTH_SCHEMA)
         db.create_all()
-    
-    # Flask-Login 설정
-    login_manager = LoginManager()       
+
+    login_manager = LoginManager()
     login_manager.init_app(app)
     app.register_blueprint(auth, url_prefix='/auth')
 
