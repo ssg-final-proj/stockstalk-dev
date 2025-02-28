@@ -33,6 +33,7 @@ def kakaologin():
 
     return render_template("auth.html")
 
+
 @auth.route("/kakaoLoginLogic", methods=["GET"])
 def kakaoLoginLogic():
     """ 카카오 로그인 URL 생성 및 리다이렉트 """
@@ -74,6 +75,7 @@ def kakaoLoginLogicRedirect():
 
     kakao_id = kakao_user_info.get("id")
     username = kakao_user_info.get("properties", {}).get("nickname", "No username")
+    email = kakao_user_info.get("kakao_account", {}).get("email")
 
     # 데이터베이스에서 사용자 확인
     user_to_store = User.query.filter_by(kakao_id=kakao_id).first()
@@ -83,7 +85,7 @@ def kakaoLoginLogicRedirect():
             user_to_store = User(
                 kakao_id=kakao_id,
                 username=username,
-                email=None,
+                email=email,
                 seed_krw=1000000.0,
                 seed_usd=0.0,
                 created_at=datetime.now(timezone.utc),
@@ -99,6 +101,8 @@ def kakaoLoginLogicRedirect():
     else:
         try:
             user_to_store.last_login = datetime.now(timezone.utc)
+            if not user_to_store.email and email:  # ✅ 기존 유저의 이메일이 없고, 카카오에서 받은 이메일이 있으면 추가
+                user_to_store.email = email
             db.session.commit()
             db.session.refresh(user_to_store)  # 커밋 후 세션 데이터 유지
         except Exception as e:
@@ -125,7 +129,7 @@ def kakaoLoginLogicRedirect():
         response = redirect(STOCK_SERVICE_URL)  # 닉네임이 설정된 경우 stock_kr.html로 리다이렉트
     
     # response.set_cookie("kakao_id", user_to_store.kakao_id, max_age=86400)  # 24시간 동안 쿠키 유지
-    response.set_cookie("kakao_id", user_to_store.kakao_id, max_age=86400, samesite='None', secure=False)
+    response.set_cookie("kakao_id", user_to_store.kakao_id, max_age=86400, samesite="Lax", secure=False)
 
     print(f"✅ 쿠키 설정 완료: {user_to_store.kakao_id}")
     return response
