@@ -29,8 +29,14 @@ def create_app():
     CORS(app, resources={r"/*": {"origins": "*"}})
 
     # DB 초기화 (auth_service 스키마 사용)
-    init_app(app, current_config.AUTH_SCHEMA)
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"{app.config['SQLALCHEMY_DATABASE_URI']}/{app.config['AUTH_SCHEMA']}"
+    db.init_app(app)
     migrate = Migrate(app, db)
+
+    # 스키마 생성
+    with app.app_context():
+        db.engine.execute(f"CREATE SCHEMA IF NOT EXISTS {app.config['AUTH_SCHEMA']}")
+        db.create_all()
     
     # Flask-Login 설정
     login_manager = LoginManager()
