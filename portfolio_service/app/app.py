@@ -360,6 +360,10 @@ def process_sell_order(event, session, user_data, current_price, order, portfoli
     user_seed_krw = float(user_data.get('seed_krw', 0))
 
     if portfolio_entry and portfolio_entry.stock_amount >= quantity and order.target_price <= current_price:
+        # 초기 투자금 감소
+        initial_investment_reduction = quantity * (portfolio_entry.initial_investment / (portfolio_entry.stock_amount + quantity)) if portfolio_entry.stock_amount > 0 else 0
+        portfolio_entry.initial_investment -= initial_investment_reduction
+
         portfolio_entry.stock_amount -= quantity
         portfolio_entry.total_value = current_price * portfolio_entry.stock_amount
 
@@ -381,6 +385,7 @@ def process_sell_order(event, session, user_data, current_price, order, portfoli
         portfolio_entry.profit_rate = profit_rate  # DB에도 저장
     else:
         logger.info(f"SELL order conditions not met for kakao_id: {kakao_id}, stock: {stock_symbol}")
+
 
 def process_order(event, session):
     kakao_id = event['kakao_id']

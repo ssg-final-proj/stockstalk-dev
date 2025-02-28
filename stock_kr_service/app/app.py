@@ -287,9 +287,10 @@ def create_app():
                     if portfolio_response.status_code == 200:
                         portfolio_data = portfolio_response.json()
                         if portfolio_data['stock_amount'] < quantity:
-                            return jsonify({"error": "보유 수량을 초과했습니다"}), 400
+                            return jsonify({"error": "보유 수량을 초과했습니다", "showAlert": True}), 400
+
                     elif portfolio_response.status_code == 404:
-                        return jsonify({"error": "해당 주식을 보유하고 있지 않습니다"}), 400
+                        return jsonify({"error": "해당 주식을 보유하고 있지 않습니다", "showAlert": True}), 400
                     else:
                         logger.error(f"Failed to fetch portfolio data. Status code: {portfolio_response.status_code}, content: {portfolio_response.content}")
                         return jsonify({"error": "포트폴리오 데이터 조회 실패"}), 500

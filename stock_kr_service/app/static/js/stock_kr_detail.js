@@ -19,6 +19,7 @@ let chartLayout = {
 // 전역 변수로 현재 주식 코드 저장
 let currentStockCode;
 let currentStockData = null; // 현재 주식 데이터를 저장할 변수
+let isOrderProcessing = false; // 주문 처리 중 여부
 
 // DOMContentLoaded 이벤트 리스너
 document.addEventListener('DOMContentLoaded', function () {
@@ -194,6 +195,12 @@ function toggleOrderForm(orderType) {
 
 // 주문 처리 함수
 async function submitOrder(orderType) {
+    if (isOrderProcessing) {
+        console.log('주문 처리 중입니다. 잠시 후 다시 시도해주세요.');
+        return;
+    }
+
+    isOrderProcessing = true;
     const quantity = document.getElementById(`${orderType.toLowerCase()}-amount`).value;
     const price = document.getElementById(`${orderType.toLowerCase()}-price`).value;
 
@@ -224,19 +231,19 @@ async function submitOrder(orderType) {
             body: JSON.stringify(orderData)
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || '주문 처리 중 오류 발생');
-        }
+        const data = await response.json();
 
-        const result = await response.json();
-        alert(result.message || '주문이 성공적으로 처리되었습니다.');
-        
-        // 페이지 새로고침 없이 주문 내역 업데이트
-        fetchOrderHistory(currentStockCode);
+        if (data.error) {
+            showError(data.error);  // 에러 메시지 표시 방식 통일
+        } else {
+            displaySuccess(data.message);
+            fetchOrderHistory(currentStockCode);  // 성공 시 주문 내역 업데이트
+        }
     } catch (error) {
         console.error('주문 처리 중 오류 발생:', error);
-        showError(error.message || '주문 처리 중 오류가 발생했습니다.');
+        showError('주문 처리 중 오류가 발생했습니다.');
+    } finally {
+        isOrderProcessing = false;
     }
 }
 
@@ -295,8 +302,6 @@ function updateOrderHistoryUI(orders) {
     }
 }
 
-
-
 const socket = io('/stock');
 
 socket.on('connect', function() {
@@ -328,6 +333,16 @@ function showError(message) {
     const errorMessageElement = document.getElementById('error-message');
     errorMessageElement.textContent = message;
     errorMessageElement.style.display = 'block';
+}
+
+// 성공 메시지 표시 함수
+function displaySuccess(message) {
+    const successMessageElement = document.getElementById('success-message');
+    successMessageElement.textContent = message;
+    successMessageElement.style.display = 'block';
+    setTimeout(() => {
+        successMessageElement.style.display = 'none';
+    }, 3000); // 3초 후 메시지 숨김
 }
 
 function getCookie(name) {
