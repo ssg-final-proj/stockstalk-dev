@@ -9,30 +9,29 @@ class Config:
         'pool_recycle': 280,
     }
 
-    REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
+    REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
     REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
     CACHE_DURATION = int(os.getenv('CACHE_DURATION', 100))
-    KAFKA_BROKER_HOST = os.getenv('KAFKA_BROKER_HOST', 'kafka:9092')
+    KAFKA_BROKER_HOST = os.getenv('KAFKA_BROKER_HOST', 'localhost:9092')
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
     project_root = os.path.abspath(os.path.join(base_dir, '..'))
 
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    SQLALCHEMY_BINDS = {
-        'users': os.getenv('DATABASE_URL') + '/' + os.getenv('AUTH_SCHEMA', 'auth_db'),
-        'stocks': os.getenv('DATABASE_URL') + '/' + os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db'),
-        'portfolios': os.getenv('DATABASE_URL') + '/' + os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db'),
-        'orders': os.getenv('DATABASE_URL') + '/' + os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db'),
-        'exchanges': os.getenv('DATABASE_URL') + '/' + os.getenv('EXCHANGE_SCHEMA', 'exchange_db')
-    }
 
-    # 스키마 설정 추가
     AUTH_SCHEMA = os.getenv('AUTH_SCHEMA', 'auth_db')
     EXCHANGE_SCHEMA = os.getenv('EXCHANGE_SCHEMA', 'exchange_db')
     PORTFOLIO_SCHEMA = os.getenv('PORTFOLIO_SCHEMA', 'portfolio_db')
-    STOCK_SCHEMA = os.getenv('STOCK_SCHEMA', 'stock_db')
 
     KOREA_INVESTMENT_KEY_PATH = os.path.join(project_root, os.getenv('KOREA_INVESTMENT_KEY_PATH', ''))
+
+    SQLALCHEMY_BINDS = {
+        'auth': SQLALCHEMY_DATABASE_URI + '/' + AUTH_SCHEMA,
+        'portfolio': SQLALCHEMY_DATABASE_URI + '/' + PORTFOLIO_SCHEMA,
+        'exchange': SQLALCHEMY_DATABASE_URI + '/' + EXCHANGE_SCHEMA,
+        'orders': SQLALCHEMY_DATABASE_URI + '/' + PORTFOLIO_SCHEMA,
+        'stock' : SQLALCHEMY_DATABASE_URI + '/' + PORTFOLIO_SCHEMA,
+    }
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -52,6 +51,5 @@ config = {
     'default': DevelopmentConfig
 }
 
-# 현재 환경 설정
 ENV = os.getenv('FLASK_ENV', 'default')
 current_config = config[ENV]
