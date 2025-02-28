@@ -149,6 +149,30 @@ body {
     margin-top: 20px;
     padding-top: 20px;
 }
+.order-history th:nth-child(1),
+.order-history td:nth-child(1) {
+    width: 25%; /* 시간 */
+}
+
+.order-history th:nth-child(2),
+.order-history td:nth-child(2) {
+    width: 15%; /* 구분 */
+}
+
+.order-history th:nth-child(3),
+.order-history td:nth-child(3) {
+    width: 15%; /* 수량 */
+}
+
+.order-history th:nth-child(4),
+.order-history td:nth-child(4) {
+    width: 20%; /* 가격 */
+}
+
+.order-history th:nth-child(5),
+.order-history td:nth-child(5) {
+    width: 25%; /* 취소 */
+}
 
 .order-history h2 {
     font-size: 1.5em;
@@ -159,6 +183,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    table-layout: fixed; /* 테이블 레이아웃 고정 */
 }
 
 .order-history th,
@@ -166,6 +191,7 @@ body {
     padding: 12px 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
+    word-break: break-all; /* 단어 단위로 줄 바꿈 */
 }
 
 .order-history th {

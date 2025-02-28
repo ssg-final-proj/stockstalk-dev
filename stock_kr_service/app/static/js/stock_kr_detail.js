@@ -46,15 +46,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const sellToggle = document.getElementById('sell-toggle');
     const chartToggle = document.getElementById('chart-toggle');
     const orderbookToggle = document.getElementById('orderbook-toggle');
-    const submitBuyOrder = document.getElementById('buy-submit');
-    const submitSellOrder = document.getElementById('sell-submit');
+    const buyForm = document.getElementById('buy-form');
+    const sellForm = document.getElementById('sell-form');
 
     if (buyToggle) buyToggle.addEventListener('click', () => toggleOrderForm('BUY'));
     if (sellToggle) sellToggle.addEventListener('click', () => toggleOrderForm('SELL'));
     if (chartToggle) chartToggle.addEventListener('click', () => toggleView('chart'));
     if (orderbookToggle) orderbookToggle.addEventListener('click', () => toggleView('orderbook'));
-    if (submitBuyOrder) submitBuyOrder.addEventListener('click', () => submitOrder('BUY'));
-    if (submitSellOrder) submitSellOrder.addEventListener('click', () => submitOrder('SELL'));
+
+    // 폼 제출 이벤트 리스너
+    if (buyForm) {
+        buyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitOrder('BUY');
+        });
+    }
+
+    if (sellForm) {
+        sellForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitOrder('SELL');
+        });
+    }
     
     // 5초마다 주식 상세 정보를 업데이트합니다.
     setInterval(() => {
@@ -164,16 +177,6 @@ function toggleOrderForm(orderType) {
     const buyToggle = document.getElementById('buy-toggle');
     const sellToggle = document.getElementById('sell-toggle');
 
-    buyForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        submitOrder('BUY');
-    });
-
-    sellForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        submitOrder('SELL');
-    });
-
     if (orderType === 'BUY') {
         buyForm.classList.add('active');
         buyForm.classList.remove('hidden');
@@ -236,6 +239,7 @@ async function submitOrder(orderType) {
 
         const result = await response.json();
         displaySuccess(result.message || '주문이 성공적으로 처리되었습니다.');  // 성공 메시지 표시
+        fetchOrderHistory(currentStockCode); // 주문 성공 후 주문 내역 업데이트
 
     } catch (error) {
         console.error('주문 처리 중 오류 발생:', error);
@@ -280,10 +284,16 @@ async function fetchOrderHistory(stockCode) {
 
 function updateOrderHistoryUI(orders) {
     const orderList = document.getElementById('order-list');
+    if (!orderList) {
+        console.error('order-list 요소를 찾을 수 없습니다.');
+        return;
+    }
     orderList.innerHTML = ''; // 기존 목록 초기화
 
     if (orders.length === 0) {
-        orderList.innerHTML = '<tr><td colspan="4">주문 내역이 없습니다.</td></tr>';
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = '<td colspan="4">주문 내역이 없습니다.</td>';
+        orderList.appendChild(emptyRow);
     } else {
         orders.forEach(order => {
             const row = document.createElement('tr');
@@ -335,18 +345,27 @@ function updateOrderHistory(orderData) {
 // 오류 메시지 표시 함수
 function showError(message) {
     const errorMessageElement = document.getElementById('error-message');
-    errorMessageElement.textContent = message;
-    errorMessageElement.style.display = 'block';
+     // Check if errorMessageElement exists before setting textContent
+    if (errorMessageElement) {
+        errorMessageElement.textContent = message;
+        errorMessageElement.style.display = 'block';
+    } else {
+        console.error('Error message element not found.');
+    }
 }
 
 // 성공 메시지 표시 함수
 function displaySuccess(message) {
     const successMessageElement = document.getElementById('success-message');
-    successMessageElement.textContent = message;
-    successMessageElement.style.display = 'block';
-    setTimeout(() => {
-        successMessageElement.style.display = 'none';
-    }, 3000); // 3초 후 메시지 숨김
+    if (successMessageElement){
+        successMessageElement.textContent = message;
+        successMessageElement.style.display = 'block';
+        setTimeout(() => {
+            successMessageElement.style.display = 'none';
+        }, 3000); // 3초 후 메시지 숨김
+    } else {
+         console.error('success message element not found.');
+    }
 }
 
 function getCookie(name) {
