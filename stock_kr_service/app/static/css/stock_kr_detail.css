@@ -225,19 +225,25 @@ body {
     background-color: #f9f9f9;
 }
 
-.cancel-order {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #f44336;
-    color: white;
-    cursor: pointer;
-    font-size: 0.85em;
-    transition: background-color 0.3s;
+/* 주문 내역 테이블 열 너비 조정 */
+.order-history th:nth-child(1),
+.order-history td:nth-child(1) {
+    width: 25%; /* 시간 */
 }
 
-.cancel-order:hover {
-    background-color: #d32f2f;
+.order-history th:nth-child(2),
+.order-history td:nth-child(2) {
+    width: 25%; /* 구분 */
+}
+
+.order-history th:nth-child(3),
+.order-history td:nth-child(3) {
+    width: 25%; /* 수량 */
+}
+
+.order-history th:nth-child(4),
+.order-history td:nth-child(4) {
+    width: 25%; /* 가격 */
 }
 
 /* 반응형 스타일 */

@@ -73,6 +73,9 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(() => {
         fetchAndUpdateStockDetail(currentStockCode);
     }, 5000);
+
+     // 페이지 로드시 매수 버튼 활성화 및 해당 폼 보이도록 설정
+    toggleOrderForm('BUY');
 });
 
 // 주식 상세 정보 가져오기
@@ -129,10 +132,14 @@ function updateChart(chartData) {
 
     const transformedData = {
         x: chartData.timestamps,
-        open: chartData.open.map(Number),
-        high: chartData.high.map(Number),
-        low: chartData.low.map(Number),
-        close: chartData.close.map(Number)
+        open: transformedData.open.map(Number),
+        high: transformedData.high.map(Number),
+        low: transformedData.low,
+        close: transformedData.close,
+        type: 'candlestick',
+        name: '캔들 차트',
+        increasing: { line: { color: 'rgb(200, 0, 0)' } },
+        decreasing: { line: { color: 'rgb(0, 113, 200)' } }
     };
 
     const trace1 = {
@@ -178,17 +185,13 @@ function toggleOrderForm(orderType) {
     const sellToggle = document.getElementById('sell-toggle');
 
     if (orderType === 'BUY') {
-        buyForm.classList.add('active');
         buyForm.classList.remove('hidden');
-        sellForm.classList.remove('active');
         sellForm.classList.add('hidden');
         buyToggle.classList.add('active');
         sellToggle.classList.remove('active');
     } else {
-        buyForm.classList.remove('active');
         buyForm.classList.add('hidden');
-        sellForm.classList.add('active');
-        sellForm.classList.remove('hidden');
+        sellForm.classList.remove('active');
         buyToggle.classList.remove('active');
         sellToggle.classList.add('active');
     }
@@ -240,7 +243,6 @@ async function submitOrder(orderType) {
 
         const result = await response.json();
         displayAlert(result.message || '주문이 성공적으로 처리되었습니다.', 'success');
-        //fetchOrderHistory(currentStockCode); // 주문 성공 후 주문 내역 업데이트
         
         // 주문 성공 후 주문 내역 업데이트 (Socket.IO 사용)
         socket.emit('order_update', {
@@ -319,7 +321,6 @@ function updateOrderHistoryUI(orders) {
                 <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
                 <td>${order.quantity}</td>
                 <td>${order.price}</td>
-                <td class="cancel-button-cell"><button class="cancel-order" data-order-id="${order.id}">취소</button></td>
             `;
             orderList.appendChild(row);
         });
