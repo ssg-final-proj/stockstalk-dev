@@ -176,6 +176,28 @@ def create_app():
 
     atexit.register(lambda: scheduler.shutdown(wait=False))
 
+    @app.route('/api/portfolio/<kakao_id>/<stock_symbol>', methods=['GET'])
+    def get_portfolio_stock(kakao_id, stock_symbol):
+        logger.info(f"get_portfolio_stock 함수 호출: kakao_id={kakao_id}, stock_symbol={stock_symbol}")  # 로그 추가
+        try:
+            portfolio_entry = Portfolio.query.filter_by(kakao_id=kakao_id, stock_symbol=stock_symbol).first()
+            if portfolio_entry:
+                logger.info(f"포트폴리오 정보 찾음: {portfolio_entry.stock_amount}")  # 로그 추가
+                return jsonify({
+                    "kakao_id": kakao_id,
+                    "stock_symbol": stock_symbol,
+                    "stock_amount": portfolio_entry.stock_amount,
+                    "total_value": portfolio_entry.total_value,
+                    "initial_investment": portfolio_entry.initial_investment,
+                    "profit_rate": portfolio_entry.profit_rate
+                }), 200
+            else:
+                logger.warning("포트폴리오 정보 없음")  # 로그 추가
+                return jsonify({"error": "Portfolio entry not found"}), 404
+        except Exception as e:
+            logger.error(f"Error fetching portfolio data: {e}")
+            return jsonify({"error": "Internal server error"}), 500
+        
     return app
 
 def consume_order_events(app):
@@ -438,25 +460,7 @@ def process_order(event, session):
         session.rollback()
         logger.error(f"Error processing order: {e}", exc_info=True)
         raise
-    
-    @app.route('/api/portfolio/<kakao_id>/<stock_symbol>', methods=['GET'])
-    def get_portfolio_stock(kakao_id, stock_symbol):
-        try:
-            portfolio_entry = Portfolio.query.filter_by(kakao_id=kakao_id, stock_symbol=stock_symbol).first()
-            if portfolio_entry:
-                return jsonify({
-                    "kakao_id": kakao_id,
-                    "stock_symbol": stock_symbol,
-                    "stock_amount": portfolio_entry.stock_amount,
-                    "total_value": portfolio_entry.total_value,
-                    "initial_investment": portfolio_entry.initial_investment,
-                    "profit_rate": portfolio_entry.profit_rate
-                }), 200
-            else:
-                return jsonify({"error": "Portfolio entry not found"}), 404
-        except Exception as e:
-            logger.error(f"Error fetching portfolio data: {e}")
-            return jsonify({"error": "Internal server error"}), 500
+
         
 if __name__ == "__main__":
     app = create_app()
