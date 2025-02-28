@@ -237,6 +237,7 @@ async function submitOrder(orderType) {
 
         if (!response.ok) {
             const errorData = await response.json();
+<<<<<<< HEAD
             displayAlert(errorData.error || '주문 처리 중 오류 발생', 'error');
             return;
         }
@@ -255,6 +256,18 @@ async function submitOrder(orderType) {
     } catch (error) {
         console.error('주문 처리 중 오류 발생:', error);
         displayAlert(error.message || '주문 처리 중 오류가 발생했습니다.', 'error');
+=======
+            throw new Error(errorData.error || '주문 처리 중 오류 발생');
+        }
+
+        const result = await response.json();
+        displaySuccess(result.message || '주문이 성공적으로 처리되었습니다.');  // 성공 메시지 표시
+        fetchOrderHistory(currentStockCode); // 주문 성공 후 주문 내역 업데이트
+
+    } catch (error) {
+        console.error('주문 처리 중 오류 발생:', error);
+        showError(error.message || '주문 처리 중 오류가 발생했습니다.'); // 오류 메시지 표시
+>>>>>>> temporary-branch
     } finally {
         isOrderProcessing = false;
     }
@@ -305,11 +318,16 @@ function updateOrderHistoryUI(orders) {
 
     if (orders.length === 0) {
         const emptyRow = document.createElement('tr');
+<<<<<<< HEAD
         emptyRow.innerHTML = '<td colspan="5">주문 내역이 없습니다.</td>';
+=======
+        emptyRow.innerHTML = '<td colspan="4">주문 내역이 없습니다.</td>';
+>>>>>>> temporary-branch
         orderList.appendChild(emptyRow);
     } else {
         orders.forEach(order => {
             const row = document.createElement('tr');
+<<<<<<< HEAD
             // 시간 형식을 시:분 으로 변경
             const formattedDate = new Date(order.date).toLocaleTimeString('ko-KR', {
                 hour: '2-digit',
@@ -318,10 +336,25 @@ function updateOrderHistoryUI(orders) {
             });
             row.innerHTML = `
                 <td>${formattedDate}</td>
+=======
+            row.innerHTML = `
+                <td>${order.date}</td>
+>>>>>>> temporary-branch
                 <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
                 <td>${order.quantity}</td>
                 <td>${order.price}</td>
             `;
+<<<<<<< HEAD
+=======
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'cancel-order';
+            cancelButton.textContent = '취소';
+            cancelButton.dataset.orderId = order.id;
+            cancelButton.addEventListener('click', () => {
+                cancelOrder(order.id);
+            });
+            row.appendChild(cancelButton);
+>>>>>>> temporary-branch
             orderList.appendChild(row);
         });
     }
@@ -354,6 +387,7 @@ function updateOrderHistory(orderData) {
     `;
     orderList.insertBefore(newRow, orderList.firstChild);
 }
+<<<<<<< HEAD
 
 // 경고 메시지 표시 함수 (팝업 창)
 function displayAlert(message, type) {
@@ -381,6 +415,18 @@ function displayAlert(message, type) {
     setTimeout(() => {
         document.body.removeChild(alertBox);
     }, 3000); // 3초 후 사라짐
+=======
+// 오류 메시지 표시 함수
+function showError(message) {
+    const errorMessageElement = document.getElementById('error-message');
+     // Check if errorMessageElement exists before setting textContent
+    if (errorMessageElement) {
+        errorMessageElement.textContent = message;
+        errorMessageElement.style.display = 'block';
+    } else {
+        console.error('Error message element not found.');
+    }
+>>>>>>> temporary-branch
 }
 
 // 오류 메시지 표시 함수 (사용하지 않음)
@@ -391,7 +437,20 @@ function showError(message) {
 
 // 성공 메시지 표시 함수 (사용하지 않음)
 function displaySuccess(message) {
+<<<<<<< HEAD
     displayAlert(message, 'success');
+=======
+    const successMessageElement = document.getElementById('success-message');
+    if (successMessageElement){
+        successMessageElement.textContent = message;
+        successMessageElement.style.display = 'block';
+        setTimeout(() => {
+            successMessageElement.style.display = 'none';
+        }, 3000); // 3초 후 메시지 숨김
+    } else {
+         console.error('success message element not found.');
+    }
+>>>>>>> temporary-branch
 }
 
 function getCookie(name) {

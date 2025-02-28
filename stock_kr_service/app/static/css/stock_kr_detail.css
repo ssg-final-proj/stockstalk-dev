@@ -228,12 +228,20 @@ body {
 /* 주문 내역 테이블 열 너비 조정 */
 .order-history th:nth-child(1),
 .order-history td:nth-child(1) {
+<<<<<<< HEAD
     width: 25%; /* 시간 */
+=======
+    width: 25%;  /* 날짜 열 */
+>>>>>>> temporary-branch
 }
 
 .order-history th:nth-child(2),
 .order-history td:nth-child(2) {
+<<<<<<< HEAD
     width: 25%; /* 구분 */
+=======
+    width: 25%;  /* 구분 열 */
+>>>>>>> temporary-branch
 }
 
 .order-history th:nth-child(3),

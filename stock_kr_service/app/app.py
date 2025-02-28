@@ -170,6 +170,7 @@ def create_app():
         # 앱 시작 시 백그라운드 태스크 시작
         background_tasks.start(redis_client_stock, fetch_all_stock_data, app.config['CACHE_DURATION'])
 
+
     @app.route('/')
     def home():
         kakao_id = request.cookies.get('kakao_id')
