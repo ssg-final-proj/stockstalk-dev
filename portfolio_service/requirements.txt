@@ -12,7 +12,5 @@ redis>=4.1.0
 kafka-python==2.0.3
 flask_cors==5.0.0
 apscheduler==3.11.0
-flask_socketio==5.5.1
+flask_socketio==5.3.6
 pytz==2023.3
-python-dotenv==1.0.1
-Flask-SocketIO==5.3.6
