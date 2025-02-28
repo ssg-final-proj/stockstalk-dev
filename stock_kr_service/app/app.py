@@ -116,6 +116,8 @@ class BackgroundTasks:
         self.is_running = False
         logging.info("Background tasks stopped successfully")
 
+redis_client_stock = None
+redis_client_user = None
 
 def create_app():
     app = Flask(__name__)
@@ -130,18 +132,25 @@ def create_app():
     app.config.from_object(config[env])
 
     # Redis 클라이언트 초기화
-    redis_client_stock = redis.StrictRedis(
-        host=app.config['REDIS_HOST'],
-        port=app.config['REDIS_PORT'],
-        db=0,  # Stock data db
-        decode_responses=True
-    )
-    redis_client_user = redis.StrictRedis(
-        host=app.config['REDIS_HOST'],
-        port=app.config['REDIS_PORT'],
-        db=1,  # User data db
-        decode_responses=True
-    )
+    global redis_client_stock, redis_client_user
+    try:
+        redis_client_stock = redis.StrictRedis(
+            host=app.config['REDIS_HOST'],
+            port=app.config['REDIS_PORT'],
+            db=0,  # Stock data db
+            decode_responses=True
+        )
+        redis_client_user = redis.StrictRedis(
+            host=app.config['REDIS_HOST'],
+            port=app.config['REDIS_PORT'],
+            db=1,  # User data db
+            decode_responses=True
+        )
+        logger.info("Redis clients initialized successfully.")
+    except Exception as e:
+        logger.error(f"Failed to initialize Redis clients: {e}", exc_info=True)
+        sys.exit(1)
+        
     app.config['REDIS_CLIENT_STOCK'] = redis_client_stock
     app.config['REDIS_CLIENT_USER'] = redis_client_user
 
@@ -284,16 +293,18 @@ def create_app():
                 elif order_type == 'SELL':
                     # 포트폴리오 서비스에서 보유 주식 수량 확인 (API 호출 필요)
                     portfolio_response = requests.get(f"http://portfolio_service:8003/api/portfolio/{kakao_id}/{stock_symbol}")
+                    portfolio_response.raise_for_status()  # HTTP 에러 발생 시 예외 발생
+
                     if portfolio_response.status_code == 200:
                         portfolio_data = portfolio_response.json()
                         if portfolio_data['stock_amount'] < quantity:
                             return jsonify({"error": "보유 수량을 초과했습니다", "showAlert": True}), 400
-
                     elif portfolio_response.status_code == 404:
                         return jsonify({"error": "해당 주식을 보유하고 있지 않습니다", "showAlert": True}), 400
                     else:
                         logger.error(f"Failed to fetch portfolio data. Status code: {portfolio_response.status_code}, content: {portfolio_response.content}")
                         return jsonify({"error": "포트폴리오 데이터 조회 실패"}), 500
+
                 # 주문 내역 생성
                 order_data = {
                     'kakao_id': kakao_id,
@@ -315,12 +326,14 @@ def create_app():
 
                 return jsonify({"message": "주문이 성공적으로 처리되었습니다.", "status": "success"}), 200
 
+            except requests.exceptions.RequestException as e:
+                logger.error(f"포트폴리오 서비스 연결 실패: {e}", exc_info=True)
+                return jsonify({"error": "포트폴리오 서비스 연결 실패"}), 500
             except Exception as e:
                 logger.error(f"주문 처리 중 오류 발생: {e}", exc_info=True)
                 return jsonify({"error": str(e)}), 500
 
         return render_template('stock_kr_detail.html', code=code)
-
 
     return app
 

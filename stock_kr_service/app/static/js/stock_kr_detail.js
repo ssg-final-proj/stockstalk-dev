@@ -46,15 +46,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const sellToggle = document.getElementById('sell-toggle');
     const chartToggle = document.getElementById('chart-toggle');
     const orderbookToggle = document.getElementById('orderbook-toggle');
-    const submitBuyOrder = document.getElementById('submit-buy-order');
-    const submitSellOrder = document.getElementById('submit-sell-order');
+    const submitBuyOrder = document.getElementById('buy-submit');
+    const submitSellOrder = document.getElementById('sell-submit');
 
     if (buyToggle) buyToggle.addEventListener('click', () => toggleOrderForm('BUY'));
     if (sellToggle) sellToggle.addEventListener('click', () => toggleOrderForm('SELL'));
     if (chartToggle) chartToggle.addEventListener('click', () => toggleView('chart'));
     if (orderbookToggle) orderbookToggle.addEventListener('click', () => toggleView('orderbook'));
-    if (submitBuyOrder) submitBuyOrder.addEventListener('click', () => submitOrder('BUY'));
-    if (submitSellOrder) submitSellOrder.addEventListener('click', () => submitOrder('SELL'));
+    
+    // 폼 제출 이벤트 핸들러를 submitOrder 함수와 연결합니다.
+    document.getElementById('buy-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitOrder('BUY');
+    });
+
+    document.getElementById('sell-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitOrder('SELL');
+    });
     
     // 5초마다 주식 상세 정보를 업데이트합니다.
     setInterval(() => {
@@ -164,16 +173,6 @@ function toggleOrderForm(orderType) {
     const buyToggle = document.getElementById('buy-toggle');
     const sellToggle = document.getElementById('sell-toggle');
 
-    buyForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        submitOrder('BUY');
-    });
-
-    sellForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        submitOrder('SELL');
-    });
-
     if (orderType === 'BUY') {
         buyForm.classList.add('active');
         buyForm.classList.remove('hidden');
@@ -190,8 +189,6 @@ function toggleOrderForm(orderType) {
         sellToggle.classList.add('active');
     }
 }
-
-// 주문 처리 함수
 
 // 주문 처리 함수
 async function submitOrder(orderType) {
@@ -246,16 +243,6 @@ async function submitOrder(orderType) {
         isOrderProcessing = false;
     }
 }
-
-// 폼 제출 방지 및 JavaScript로 처리
-document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function (event) {
-        event.preventDefault(); // 기본 제출 동작 방지
-        const orderType = form.id.includes('buy') ? 'BUY' : 'SELL';
-        submitOrder(orderType);
-    });
-});
-
 
 async function fetchOrderHistory(stockCode) {
     if (!stockCode) {
