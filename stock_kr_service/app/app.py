@@ -17,7 +17,6 @@ from .auth import *
 import json
 from config import current_config, ENV
 import logging
-from datetime import datetime 
 from flask_socketio import SocketIO, emit  # Import SocketIO and emit
 logger = logging.getLogger(__name__)
 
@@ -338,7 +337,7 @@ def create_app():
 
                 # 주문 성공 시 Socket.IO를 통해 주문 내역 업데이트
                 emit('order_update', {
-                    'date': datetime.datetime.now().strftime('%H:%M'),  # 시:분 형식으로 변경
+                    'date': datetime.now().strftime('%H:%M'),  # 시:분 형식으로 변경
                     'type': order_type,
                     'quantity': quantity,
                     'price': target_price

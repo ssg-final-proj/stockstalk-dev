@@ -306,14 +306,6 @@ function updateOrderHistoryUI(orders) {
     }
 }
 
-
-// function cancelOrder(orderId) {
-//     // TODO: 주문 취소 로직 구현
-//     console.log(`주문 ID ${orderId} 취소 요청`);
-//     // 서버에 취소 요청을 보내고, 성공 시 주문 내역을 업데이트하는 로직 추가
-// }
-
-
 const socket = io('/stock');
 
 socket.on('connect', function() {
