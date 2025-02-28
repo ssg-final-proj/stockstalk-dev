@@ -2,7 +2,7 @@ import os
 import sys
 import asyncio
 import logging
-import datetime
+from datetime import datetime
 from flask_migrate import Migrate
 from kafka import KafkaProducer
 import redis
@@ -336,7 +336,7 @@ def create_app():
                     return jsonify({"error": "Failed to process order"}), 500
 
                 # 주문 성공 시 Socket.IO를 통해 주문 내역 업데이트
-                emit('order_update', {
+                socketio.emit('order_update', {
                     'date': datetime.now().strftime('%H:%M'),  # 시:분 형식으로 변경
                     'type': order_type,
                     'quantity': quantity,
