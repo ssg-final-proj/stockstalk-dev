@@ -227,3 +227,22 @@ body {
         padding: 8px;
     }
 }
+.order-history th:nth-child(5),
+.order-history td:nth-child(5) {
+    width: 15%;  /* 취소 버튼 열 */
+}
+
+.cancel-order {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e62e19; /* 빨간색 */
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.cancel-order:hover {
+    background-color: #e64a19; /* 밝은 빨간색 */
+}

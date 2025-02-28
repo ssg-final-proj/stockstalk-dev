@@ -16,6 +16,7 @@ from flask_migrate import Migrate
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
@@ -361,7 +362,8 @@ def process_sell_order(event, session, user_data, current_price, order, portfoli
 
     if portfolio_entry and portfolio_entry.stock_amount >= quantity and order.target_price <= current_price:
         # 초기 투자금 감소
-        initial_investment_reduction = quantity * (portfolio_entry.initial_investment / (portfolio_entry.stock_amount + quantity)) if portfolio_entry.stock_amount > 0 else 0
+        sell_ratio = quantity / portfolio_entry.stock_amount
+        initial_investment_reduction = portfolio_entry.initial_investment * sell_ratio
         portfolio_entry.initial_investment -= initial_investment_reduction
 
         portfolio_entry.stock_amount -= quantity

@@ -53,17 +53,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sellToggle) sellToggle.addEventListener('click', () => toggleOrderForm('SELL'));
     if (chartToggle) chartToggle.addEventListener('click', () => toggleView('chart'));
     if (orderbookToggle) orderbookToggle.addEventListener('click', () => toggleView('orderbook'));
-    
-    // 폼 제출 이벤트 핸들러를 submitOrder 함수와 연결합니다.
-    document.getElementById('buy-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        submitOrder('BUY');
-    });
-
-    document.getElementById('sell-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        submitOrder('SELL');
-    });
+    if (submitBuyOrder) submitBuyOrder.addEventListener('click', () => submitOrder('BUY'));
+    if (submitSellOrder) submitSellOrder.addEventListener('click', () => submitOrder('SELL'));
     
     // 5초마다 주식 상세 정보를 업데이트합니다.
     setInterval(() => {
@@ -125,18 +116,10 @@ function updateChart(chartData) {
 
     const transformedData = {
         x: chartData.timestamps,
-        open: chartData.open.map(Number),
-        high: chartData.high.map(Number),
-        low: chartData.low.map(Number),
-        close: chartData.close.map(Number)
-    };
-
-    const trace1 = {
-        x: transformedData.x,
-        open: transformedData.open,
-        high: transformedData.high,
-        low: transformedData.low,
-        close: transformedData.close,
+        open: chartData.open,
+        high: chartData.high,
+        low: chartData.low,
+        close: chartData.close,
         type: 'candlestick',
         name: '캔들 차트',
         increasing: { line: { color: 'rgb(200, 0, 0)' } },
@@ -172,6 +155,16 @@ function toggleOrderForm(orderType) {
     const sellForm = document.getElementById('sell-form');
     const buyToggle = document.getElementById('buy-toggle');
     const sellToggle = document.getElementById('sell-toggle');
+
+    buyForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitOrder('BUY');
+    });
+
+    sellForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitOrder('SELL');
+    });
 
     if (orderType === 'BUY') {
         buyForm.classList.add('active');
@@ -228,21 +221,30 @@ async function submitOrder(orderType) {
             body: JSON.stringify(orderData)
         });
 
-        const data = await response.json();
-
-        if (data.error) {
-            showError(data.error);  // 에러 메시지 표시 방식 통일
-        } else {
-            displaySuccess(data.message);
-            fetchOrderHistory(currentStockCode);  // 성공 시 주문 내역 업데이트
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || '주문 처리 중 오류 발생');
         }
+
+        const result = await response.json();
+        displaySuccess(result.message || '주문이 성공적으로 처리되었습니다.');  // 성공 메시지 표시
+
     } catch (error) {
         console.error('주문 처리 중 오류 발생:', error);
-        showError('주문 처리 중 오류가 발생했습니다.');
+        showError(error.message || '주문 처리 중 오류가 발생했습니다.'); // 오류 메시지 표시
     } finally {
         isOrderProcessing = false;
     }
 }
+
+// 폼 제출 방지 및 JavaScript로 처리
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function (event) {
+        event.preventDefault(); // 기본 제출 동작 방지
+        const orderType = form.id.includes('buy') ? 'BUY' : 'SELL';
+        submitOrder(orderType);
+    });
+});
 
 async function fetchOrderHistory(stockCode) {
     if (!stockCode) {
@@ -273,21 +275,39 @@ function updateOrderHistoryUI(orders) {
     orderList.innerHTML = ''; // 기존 목록 초기화
 
     if (orders.length === 0) {
-        orderList.innerHTML = '<tr><td colspan="4">주문 내역이 없습니다.</td></tr>';
+        orderList.innerHTML = '<tr><td colspan="5">주문 내역이 없습니다.</td></tr>';
     } else {
         orders.forEach(order => {
+            const date = new Date(order.date);
+            const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
             const row = `
                 <tr>
-                    <td>${order.date}</td>
+                    <td>${formattedTime}</td>
                     <td>${order.type === 'BUY' ? '매수' : '매도'}</td>
                     <td>${order.quantity}</td>
                     <td>${order.price}</td>
+                    <td><button class="cancel-order" data-order-id="${order.id}">취소</button></td>
                 </tr>
             `;
             orderList.innerHTML += row;
         });
     }
+
+    // 취소 버튼에 이벤트 리스너 추가
+    document.querySelectorAll('.cancel-order').forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-order-id');
+            cancelOrder(orderId);
+        });
+    });
 }
+
+// function cancelOrder(orderId) {
+//     // TODO: 주문 취소 로직 구현
+//     console.log(`주문 ID ${orderId} 취소 요청`);
+//     // 서버에 취소 요청을 보내고, 성공 시 주문 내역을 업데이트하는 로직 추가
+// }
+
 
 const socket = io('/stock');
 
