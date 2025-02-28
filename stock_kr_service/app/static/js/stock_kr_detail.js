@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
     currentStockCode = new URLSearchParams(window.location.search).get('code');
     if (!currentStockCode) {
         console.error('주식 코드가 없습니다.');
-        showError('주식 코드를 찾을 수 없습니다.');
+        displayAlert('주식 코드를 찾을 수 없습니다.', 'error');
         return; // code가 없을 경우 여기서 중단
     }
 
@@ -88,7 +88,7 @@ async function fetchAndUpdateStockDetail(stockCode) {
 
         if (data.error) {
             console.error('주식 데이터 오류:', data.error);
-            showError(data.error);
+            displayAlert(data.error, 'error');
             return;
         }
 
@@ -96,7 +96,7 @@ async function fetchAndUpdateStockDetail(stockCode) {
         updateUI(data);
     } catch (error) {
         console.error('주식 상세 정보를 가져오는 중 오류 발생:', error);
-        showError('주식 데이터를 가져오는 중 오류가 발생했습니다.');
+        displayAlert('주식 데이터를 가져오는 중 오류가 발생했습니다.', 'error');
     }
 }
 
@@ -114,7 +114,7 @@ function updateUI(data) {
         stockInfoElement.innerHTML = `<span style="color: ${stockColor}">${stock.price || 0}원 (${stockChange}원, ${stock.percent_change || 0}%)</span>`;
         updateChart(stock.chart_data || {});
     } else {
-        showError('해당 종목에 대한 데이터를 찾을 수 없습니다.');
+        displayAlert('해당 종목에 대한 데이터를 찾을 수 없습니다.', 'error');
     }
 }
 
@@ -206,13 +206,13 @@ async function submitOrder(orderType) {
     const price = document.getElementById(`${orderType.toLowerCase()}-price`).value;
 
     if (!currentStockCode) {
-        showError('주식 코드를 찾을 수 없습니다.');
+        displayAlert('주식 코드를 찾을 수 없습니다.', 'error');
         return;
     }
 
     const kakaoId = getCookie('kakao_id');
     if (!kakaoId) {
-        showError('로그인이 필요합니다.');
+        displayAlert('로그인이 필요합니다.', 'error');
         window.location.href = '/login';
         return;
     }
@@ -240,7 +240,15 @@ async function submitOrder(orderType) {
 
         const result = await response.json();
         displayAlert(result.message || '주문이 성공적으로 처리되었습니다.', 'success');
-        fetchOrderHistory(currentStockCode); // 주문 성공 후 주문 내역 업데이트
+        //fetchOrderHistory(currentStockCode); // 주문 성공 후 주문 내역 업데이트
+        
+        // 주문 성공 후 주문 내역 업데이트 (Socket.IO 사용)
+        socket.emit('order_update', {
+            date: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }),
+            type: orderType,
+            quantity: quantity,
+            price: price
+        });
 
     } catch (error) {
         console.error('주문 처리 중 오류 발생:', error);
@@ -326,7 +334,8 @@ socket.on('connect', function() {
 
 socket.on('order_update', function(data) {
     console.log('주문 업데이트 수신:', data);
-    updateOrderHistory(data);
+    //updateOrderHistory(data);
+    fetchOrderHistory(currentStockCode);
 });
 
 // 새로운 updateOrderHistory 함수를 추가합니다:
