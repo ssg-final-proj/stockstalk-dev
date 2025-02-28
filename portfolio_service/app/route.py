@@ -180,3 +180,4 @@ def update_user_data(kakao_id, new_data):
                 logger.warning(f"User not found for kakao_id: {kakao_id}")
     except SQLAlchemyError as e:
         logger.error(f"Database error in update_user_data: {str(e)}")
+

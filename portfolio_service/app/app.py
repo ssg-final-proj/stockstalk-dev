@@ -10,7 +10,7 @@ import requests
 import pytz
 from redis.lock import Lock
 from datetime import datetime
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from kafka import KafkaConsumer
@@ -30,6 +30,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 redis_lock_timeout = 3
+MAX_RETRY = 3  # 최대 재시도 횟수
 
 # Load environment variables
 load_dotenv()
@@ -59,10 +60,6 @@ def create_app():
         db.create_all()
 
     app.register_blueprint(portfolio)
-
-    @app.route('/')
-    def index():
-        return render_template('index.html')
 
     def check_pending_orders():
         with app.app_context():
@@ -142,7 +139,6 @@ def create_app():
                         else:
                             logger.warning(
                                 f"Portfolio entry not found for kakao_id: {kakao_id}, stock_symbol: {stock_symbol}")
-
                     except Exception as e:
                         logger.error(f"Error syncing profit rate for key {key}: {e}", exc_info=True)
 
@@ -259,27 +255,31 @@ def handle_order_event(event):
 
 def update_user_in_auth_service(kakao_id, seed_krw):
     update_url = "http://3.34.97.76:8001/auth/api/update_user"
-    try:
-        user_data_str = redis_client_user.get(f'session:{kakao_id}')
-        if not user_data_str:
-            raise ValueError(f"User data not found for kakao_id: {kakao_id}")
+    for retry in range(MAX_RETRY):
+        try:
+            logger.info(f"Attempt {retry + 1} to update user in Auth service")
+            user_data_str = redis_client_user.get(f'session:{kakao_id}')
+            if not user_data_str:
+                raise ValueError(f"User data not found for kakao_id: {kakao_id}")
 
-        user_data = json.loads(user_data_str)
+            user_data = json.loads(user_data_str)
+            response = requests.post(update_url, json={
+                "kakao_id": kakao_id,
+                "seed_krw": seed_krw,
+                "seed_usd": user_data['seed_usd']
+            })
 
-        response = requests.post(update_url, json={
-            "kakao_id": kakao_id,
-            "seed_krw": seed_krw,
-            "seed_usd": user_data['seed_usd']
-        })
+            if response.status_code != 200:
+                logger.error(f"Auth service 업데이트 실패: {response.text}")
+                raise Exception("Auth service update failed")
 
-        if response.status_code != 200:
-            logger.error(f"Auth service 업데이트 실패: {response.text}")
-            raise Exception("Auth service update failed")
-
-        logger.info("Auth service 업데이트 성공")
-    except Exception as e:
-        logger.error(f"Auth 서비스 업데이트 중 오류 발생: {str(e)}")
-        raise
+            logger.info("Auth service 업데이트 성공")
+            return  # 성공하면 함수 종료
+        except Exception as e:
+            logger.error(f"Auth 서비스 업데이트 중 오류 발생 (Attempt {retry + 1}): {str(e)}")
+            if retry == MAX_RETRY - 1:
+                raise  # 마지막 재시도에도 실패하면 예외 발생
+            time.sleep(2 ** retry)  # Exponential backoff
 
 def process_buy_order(event, session, user_data, current_price, order, portfolio_entry):
     kakao_id = event['kakao_id']
@@ -370,16 +370,46 @@ def process_order(event, session):
     lock = Lock(redis_client_lock, f'user_lock:{kakao_id}', timeout=redis_lock_timeout)
     try:
         with lock:
-            user_data_str = redis_client_user.get(f'session:{kakao_id}')
-            if not user_data_str:
-                raise ValueError(f"User data not found for kakao_id: {kakao_id}")
+            # 사용자 데이터 재시도 로직
+            user_data = None
+            for retry in range(MAX_RETRY):
+                try:
+                    user_data_str = redis_client_user.get(f'session:{kakao_id}')
+                    if not user_data_str:
+                        logger.warning(f"Attempt {retry + 1}: User data not found in Redis for kakao_id: {kakao_id}")
+                        time.sleep(2 ** retry)  # Exponential backoff
+                        continue
+                    user_data = json.loads(user_data_str)
+                    break  # 성공하면 루프 종료
+                except redis.exceptions.ConnectionError as e:
+                    logger.error(f"Redis connection error (attempt {retry + 1}): {e}")
+                    time.sleep(2 ** retry)
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON decode error (attempt {retry + 1}): {e}")
+                    break #데이터 문제이므로 재시도 X
+            if not user_data:
+                raise ValueError(f"Failed to retrieve user data after {MAX_RETRY} attempts for kakao_id: {kakao_id}")
 
-            user_data = json.loads(user_data_str)
-            current_price_data_str = redis_client_stock.get(f'stock_data:{stock_symbol}')
-            if not current_price_data_str:
-                raise ValueError(f"Current stock price not found for symbol: {stock_symbol}")
+            # 주식 가격 데이터 재시도 로직
+            current_price_data = None
+            for retry in range(MAX_RETRY):
+                try:
+                    current_price_data_str = redis_client_stock.get(f'stock_data:{stock_symbol}')
+                    if not current_price_data_str:
+                        logger.warning(f"Attempt {retry + 1}: Current stock price not found in Redis for symbol: {stock_symbol}")
+                        time.sleep(2 ** retry)  # Exponential backoff
+                        continue
+                    current_price_data = json.loads(current_price_data_str)
+                    break  # 성공하면 루프 종료
+                except redis.exceptions.ConnectionError as e:
+                    logger.error(f"Redis connection error (attempt {retry + 1}): {e}")
+                    time.sleep(2 ** retry)
+                except json.JSONDecodeError as e:
+                    logger.error(f"JSON decode error (attempt {retry + 1}): {e}")
+                    break #데이터 문제이므로 재시도 X
+            if not current_price_data:
+                raise ValueError(f"Failed to retrieve current stock price after {MAX_RETRY} attempts for symbol: {stock_symbol}")
 
-            current_price_data = json.loads(current_price_data_str)
             current_price = float(current_price_data.get('price', 0))
 
             order = session.query(Order).filter_by(
@@ -408,7 +438,26 @@ def process_order(event, session):
         session.rollback()
         logger.error(f"Error processing order: {e}", exc_info=True)
         raise
-
+    
+    @app.route('/api/portfolio/<kakao_id>/<stock_symbol>', methods=['GET'])
+    def get_portfolio_stock(kakao_id, stock_symbol):
+        try:
+            portfolio_entry = Portfolio.query.filter_by(kakao_id=kakao_id, stock_symbol=stock_symbol).first()
+            if portfolio_entry:
+                return jsonify({
+                    "kakao_id": kakao_id,
+                    "stock_symbol": stock_symbol,
+                    "stock_amount": portfolio_entry.stock_amount,
+                    "total_value": portfolio_entry.total_value,
+                    "initial_investment": portfolio_entry.initial_investment,
+                    "profit_rate": portfolio_entry.profit_rate
+                }), 200
+            else:
+                return jsonify({"error": "Portfolio entry not found"}), 404
+        except Exception as e:
+            logger.error(f"Error fetching portfolio data: {e}")
+            return jsonify({"error": "Internal server error"}), 500
+        
 if __name__ == "__main__":
     app = create_app()
     app.run(host="0.0.0.0", port=8003, debug=False)

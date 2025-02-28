@@ -284,14 +284,15 @@ def create_app():
                 elif order_type == 'SELL':
                     # 포트폴리오 서비스에서 보유 주식 수량 확인 (API 호출 필요)
                     portfolio_response = requests.get(f"http://portfolio_service:8003/api/portfolio/{kakao_id}/{stock_symbol}")
-                    if portfolio_response.status_code != 200:
+                    if portfolio_response.status_code == 200:
+                        portfolio_data = portfolio_response.json()
+                        if portfolio_data['stock_amount'] < quantity:
+                            return jsonify({"error": "보유 수량을 초과했습니다"}), 400
+                    elif portfolio_response.status_code == 404:
+                        return jsonify({"error": "해당 주식을 보유하고 있지 않습니다"}), 400
+                    else:
                         logger.error(f"Failed to fetch portfolio data. Status code: {portfolio_response.status_code}, content: {portfolio_response.content}")
-                        return jsonify({"error": "Failed to fetch portfolio data"}), 500
-                    
-                    portfolio_data = portfolio_response.json()
-                    if portfolio_data['quantity'] < quantity:
-                        return jsonify({"error": "보유 수량을 초과했습니다"}), 400
-
+                        return jsonify({"error": "포트폴리오 데이터 조회 실패"}), 500
                 # 주문 내역 생성
                 order_data = {
                     'kakao_id': kakao_id,
@@ -306,7 +307,7 @@ def create_app():
                 try:
                     producer.send('orders_topic', value=order_data)
                     producer.flush()
-                    logging.info("Kafka message sent successfully.")
+                    logging.info(f"Kafka message sent successfully: {order_data}")  # 로그 추가
                 except Exception as e:
                     logging.error(f"Failed to send Kafka message: {e}")
                     return jsonify({"error": "Failed to process order"}), 500
@@ -318,6 +319,7 @@ def create_app():
                 return jsonify({"error": str(e)}), 500
 
         return render_template('stock_kr_detail.html', code=code)
+
 
     return app
 
