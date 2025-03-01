@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from config import current_config, ENV
 from flask_cors import CORS
 from sqlalchemy.sql import text
+from flask_sqlalchemy import SQLAlchemy
 
 # 프로젝트 루트 디렉터리를 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -59,7 +60,7 @@ def create_app():
         try:
             # 데이터베이스 연결 테스트
             with db.engine.connect() as connection:
-                connection.execute(text("SELECT 1"))  # text()로 감싸야 오류 해결됨
+                db.session.execute(text("SELECT 1"))  # SQLAlchemy 세션을 사용해야 함
             return jsonify({"status": "ready"}), 200
         except Exception as e:
             return jsonify({"status": "not ready", "error": str(e)}), 500
