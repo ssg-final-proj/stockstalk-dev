@@ -9,8 +9,8 @@ import redis
 
 # 카카오 API 설정
 REST_API_KEY = os.getenv("KAKAO_SECRET_KEY")
-REDIRECT_URI = "http://3.34.97.76:8001/auth/kakaoLoginLogicRedirect"
-STOCK_SERVICE_URL = "http://3.34.97.76:8002/"
+REDIRECT_URI = "http://www.stockstalk.store:8001/auth/kakaoLoginLogicRedirect"
+STOCK_SERVICE_URL = "http://www.stockstalk.store:8002/"
 
 # Redis 클라이언트 설정
 redis_client_user = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=int(os.getenv('REDIS_PORT')), db=1, decode_responses=True)
