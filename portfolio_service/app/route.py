@@ -184,26 +184,32 @@ def update_user_data(kakao_id, new_data):
 
 @portfolio.route("/api/cancel-order", methods=["POST"])
 def cancel_order():
-    data = request.json
+    data = request.get_json()
     order_id = data.get('order_id')
     kakao_id = request.cookies.get('kakao_id')
 
+    logger.info(f"Attempting to cancel order. order_id: {order_id}, kakao_id: {kakao_id}") # 로그 추가
+
     if not order_id or not kakao_id:
+        logger.warning(f"Missing order_id or kakao_id. order_id: {order_id}, kakao_id: {kakao_id}")
         return jsonify({"error": "주문 ID와 로그인이 필요합니다."}), 400
 
     try:
         with db.session() as session:
             order = session.query(Order).filter(Order.id == order_id, Order.kakao_id == kakao_id, Order.status == 'PENDING').first()
-            if order:
-                order.status = 'CANCELLED'
-                session.commit()
-                return jsonify({"message": "주문이 취소되었습니다.", "order_id": order_id}), 200
-            else:
+            if not order:
+                logger.warning(f"Order not found or not PENDING. order_id: {order_id}, kakao_id: {kakao_id}")
                 return jsonify({"error": "취소할 주문을 찾을 수 없습니다."}), 404
+
+            order.status = 'CANCELLED'
+            session.commit()
+            logger.info(f"Order cancelled successfully. order_id: {order_id}, kakao_id: {kakao_id}")
+            return jsonify({"message": "주문이 취소되었습니다.", "order_id": order_id}), 200
+
     except SQLAlchemyError as e:
         session.rollback()
-        logger.error(f"Database error in cancel_order: {str(e)}", exc_info=True)
+        logger.error(f"Database error in cancel_order: {str(e)}, order_id: {order_id}, kakao_id: {kakao_id}", exc_info=True)
         return jsonify({"error": "데이터베이스 오류가 발생했습니다."}), 500
     except Exception as e:
-        logger.error(f"Unexpected error in cancel_order: {str(e)}", exc_info=True)
+        logger.error(f"Unexpected error in cancel_order: {str(e)}, order_id: {order_id}, kakao_id: {kakao_id}", exc_info=True)
         return jsonify({"error": "예기치 않은 오류가 발생했습니다."}), 500
