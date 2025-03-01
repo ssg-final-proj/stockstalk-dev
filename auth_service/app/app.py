@@ -47,6 +47,22 @@ def create_app():
     def main():
         return render_template('auth.html')
 
+    @app.route('/healthz', methods=['GET'])
+    def health_check():
+        """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""
+        return jsonify({"status": "ok"}), 200
+
+    @app.route('/readiness', methods=['GET'])
+    def readiness_check():
+        """Readiness Probe - 애플리케이션이 준비되었는지 확인"""
+        try:
+            # 데이터베이스 연결 테스트
+            with db.engine.connect() as connection:
+                connection.execute("SELECT 1")
+            return jsonify({"status": "ready"}), 200
+        except Exception as e:
+            return jsonify({"status": "not ready", "error": str(e)}), 500
+    
     return app
 
 if __name__ == "__main__":
