@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Redis 클라이언트 설정
 redis_client_stock = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=6379, db=0, decode_responses=True)
-redis_client_user = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=6379, db=1, decode_responses=True)
+redis_client_user = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=int(os.getenv('REDIS_PORT', 6379)), db=1, decode_responses=True)
 redis_client_lock = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=int(os.getenv('REDIS_PORT', 6379)), db=2, decode_responses=True)
 redis_client_profit = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=int(os.getenv('REDIS_PORT', 6379)), db=3, decode_responses=True)
 
@@ -143,13 +143,14 @@ def mypage_api():
         ],
         "today_orders": [
             {
+                "order_id": order.Order.id,  # 주문 ID 추가
                 "stock_symbol": order.Order.stock_symbol,
                 "stock_name": order.stock_name,
                 "order_type": order.Order.order_type,
                 "target_price": order.Order.target_price,
                 "quantity": order.Order.quantity,
                 "status": order.Order.status,
-                "created_at": order.Order.created_at.strftime('%Y-%m-%d %H:%M:%S')
+                "created_at": order.Order.created_at.astimezone(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')  # KST로 변경
             }
             for order in today_orders
         ]
@@ -181,3 +182,27 @@ def update_user_data(kakao_id, new_data):
     except SQLAlchemyError as e:
         logger.error(f"Database error in update_user_data: {str(e)}")
 
+@portfolio.route("/api/cancel-order", methods=["POST"])
+def cancel_order():
+    order_id = request.json.get('order_id')
+    kakao_id = request.cookies.get('kakao_id')
+
+    if not order_id or not kakao_id:
+        return jsonify({"error": "주문 ID와 로그인이 필요합니다."}), 400
+
+    try:
+        with db.session() as session:
+            order = session.query(Order).filter(Order.id == order_id, Order.kakao_id == kakao_id, Order.status == 'PENDING').first()
+            if order:
+                order.status = 'CANCELLED'
+                session.commit()
+                return jsonify({"message": "주문이 취소되었습니다."}), 200
+            else:
+                return jsonify({"error": "취소할 주문을 찾을 수 없습니다."}), 404
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f"Database error in cancel_order: {str(e)}", exc_info=True)
+        return jsonify({"error": "데이터베이스 오류가 발생했습니다."}), 500
+    except Exception as e:
+        logger.error(f"Unexpected error in cancel_order: {str(e)}", exc_info=True)
+        return jsonify({"error": "예기치 않은 오류가 발생했습니다."}), 500

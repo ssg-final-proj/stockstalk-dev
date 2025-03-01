@@ -86,6 +86,7 @@
                             <th>수량</th>
                             <th>상태</th>
                             <th>주문일</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -106,7 +107,12 @@
                                         취소됨
                                     {% endif %}
                                 </td>
-                                <td>{{ order.created_at.astimezone(KST).strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>{{ order.created_at }}</td>
+                                <td>
+                                    {% if order.status == "PENDING" %}
+                                        <button onclick="cancelOrder({{ order.order_id }})">취소</button>
+                                    {% endif %}
+                                </td>
                             </tr>
                     {% endfor %}
                     </tbody>
@@ -116,5 +122,29 @@
             {% endif %}
         </section>
     </main>
+    <script>
+        function cancelOrder(orderId) {
+            fetch('/api/cancel-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ order_id: orderId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    location.reload();
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('주문 취소 중 오류가 발생했습니다.');
+            });
+        }
+    </script>
 </body>
 </html>

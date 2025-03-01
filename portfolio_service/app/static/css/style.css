@@ -147,11 +147,29 @@ body {
   .order-type-buy { color: #e0533a; font-weight: bold; }
   .order-type-sell { color: #3b61df; font-weight: bold; }
   
+  button {
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #c53030;
+}
+
   @media (max-width: 768px) {
     header h1 {
       font-size: 1.5rem;
     }
-  
+    button {
+      width: 100%;
+      margin-top: 10px;
+  }
     .navbar {
       position: static;
       justify-content: center;
