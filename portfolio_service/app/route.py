@@ -5,7 +5,7 @@ import redis
 from flask import Blueprint, render_template, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from db import db, User, Order, Portfolio, Stock
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 from pytz import timezone
 
 # 로그 설정
@@ -181,3 +181,28 @@ def update_user_data(kakao_id, new_data):
                 logger.warning(f"User not found for kakao_id: {kakao_id}")
     except SQLAlchemyError as e:
         logger.error(f"Database error in update_user_data: {str(e)}")
+
+@portfolio.route("/api/cancel-order", methods=["POST"])
+def cancel_order():
+    order_id = request.json.get('order_id')
+    kakao_id = request.cookies.get('kakao_id')
+
+    if not order_id or not kakao_id:
+        return jsonify({"error": "주문 ID와 로그인이 필요합니다."}), 400
+
+    try:
+        with db.session() as session:
+            order = session.query(Order).filter(Order.id == order_id, Order.kakao_id == kakao_id, Order.status == 'PENDING').first()
+            if order:
+                order.status = 'CANCELLED'
+                session.commit()
+                return jsonify({"message": "주문이 취소되었습니다."}), 200
+            else:
+                return jsonify({"error": "취소할 주문을 찾을 수 없습니다."}), 404
+    except SQLAlchemyError as e:
+        session.rollback()
+        logger.error(f"Database error in cancel_order: {str(e)}", exc_info=True)
+        return jsonify({"error": "데이터베이스 오류가 발생했습니다."}), 500
+    except Exception as e:
+        logger.error(f"Unexpected error in cancel_order: {str(e)}", exc_info=True)
+        return jsonify({"error": "예기치 않은 오류가 발생했습니다."}), 500

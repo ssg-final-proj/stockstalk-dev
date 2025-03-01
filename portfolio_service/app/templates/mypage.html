@@ -77,88 +77,74 @@
         <section class="order-history">
             <h2>주문 내역</h2>
             {% if today_orders %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>종목명</th>
-                        <th>주문 종류</th>
-                        <th>주문 가격</th>
-                        <th>수량</th>
-                        <th>상태</th>
-                        <th class="order-date-and-cancel">주문일</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order, stock_name in today_orders %}
-                    <tr data-order-time="{{ order.created_at }}">
-                        <td>{{ stock_name }}</td>
-                        <td class="{% if order.order_type == 'BUY' %}order-type-buy{% else %}order-type-sell{% endif %}">
-                            {{ "매수" if order.order_type == "BUY" else "매도" }}
-                        </td>
-                        <td>{{ "{:,.0f}".format(order.target_price) if order.target_price is not none else 'N/A' }} KRW</td>
-                        <td>{{ order.quantity|int }}주</td>
-                        <td>
-                            {% if order.status == "PENDING" %}
-                                대기 중
-                            {% elif order.status == "COMPLETED" %}
-                                완료됨
-                            {% else %}
-                                취소됨
-                            {% endif %}
-                        </td>
-                        <td class="order-date-and-cancel">
-                            {{ order.created_at }}
-                            {% if order.status == "PENDING" %}
-                                <button onclick="cancelOrder('{{ order.created_at }}')">취소</button>
-                            {% endif %}
-                        </td>
-                    </tr>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>종목명</th>
+                            <th>주문 종류</th>
+                            <th>주문 가격</th>
+                            <th>수량</th>
+                            <th>상태</th>
+                            <th>주문일</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order, stock_name in today_orders %}
+                            <tr>
+                                <td>{{ stock_name }}</td>
+                                <td class="{% if order.order_type == 'BUY' %}order-type-buy{% else %}order-type-sell{% endif %}">
+                                    {{ "매수" if order.order_type == "BUY" else "매도" }}
+                                </td>                                
+                                <td>{{ "{:,.0f}".format(order.target_price) if order.target_price is not none else 'N/A' }} KRW</td>
+                                <td>{{ order.quantity|int }}주</td>
+                                <td>
+                                    {% if order.status == "PENDING" %}
+                                        대기 중
+                                    {% elif order.status == "COMPLETED" %}
+                                        완료됨
+                                    {% else %}
+                                        취소됨
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.created_at }}</td>
+                                <td>
+                                    {% if order.status == "PENDING" %}
+                                        <button onclick="cancelOrder({{ order.order_id }})">취소</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
                     {% endfor %}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             {% else %}
-            <p>현재 주문 내역이 없습니다.</p>
+                <p>현재 주문 내역이 없습니다.</p>
             {% endif %}
         </section>
-        
-        <script>
-        function cancelOrder(orderTime) {
-            console.log("Cancelling order with time:", orderTime);
+    </main>
+    <script>
+        function cancelOrder(orderId) {
             fetch('/api/cancel-order', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    //'X-CSRFToken': '{{ csrf_token() }}'  // CSRF 토큰 헤더 삭제
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    order_time: orderTime  // 주문 ID 대신 주문 시간을 전송
-                })
+                body: JSON.stringify({ order_id: orderId })
             })
-            .then(response => {
-                if (!response.ok) {
-                    console.error('HTTP error!', response.status, response.statusText);
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 if (data.message) {
                     alert(data.message);
-                    // 취소된 주문 행을 화면에서 제거 (주문 시간을 사용하여 찾음)
-                    const orderRow = document.querySelector(`tr[data-order-time="${orderTime}"]`);
-                    if (orderRow) {
-                        orderRow.remove();
-                    }
+                    location.reload();
                 } else if (data.error) {
                     alert(data.error);
                 }
             })
             .catch(error => {
-                console.error('주문 취소 중 오류 발생:', error, "Order Time:", orderTime);
+                console.error('Error:', error);
                 alert('주문 취소 중 오류가 발생했습니다.');
             });
         }
-        </script>            
+    </script>
 </body>
 </html>
