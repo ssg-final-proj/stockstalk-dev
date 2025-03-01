@@ -342,30 +342,14 @@ function updateOrderHistory(orderData) {
     `;
     orderList.insertBefore(newRow, orderList.firstChild);
 }
-// 오류 메시지 표시 함수
+// 오류 메시지 표시 함수 (팝업)
 function showError(message) {
-    const errorMessageElement = document.getElementById('error-message');
-     // Check if errorMessageElement exists before setting textContent
-    if (errorMessageElement) {
-        errorMessageElement.textContent = message;
-        errorMessageElement.style.display = 'block';
-    } else {
-        console.error('Error message element not found.');
-    }
+    alert(message);
 }
 
-// 성공 메시지 표시 함수
+// 성공 메시지 표시 함수 (팝업)
 function displaySuccess(message) {
-    const successMessageElement = document.getElementById('success-message');
-    if (successMessageElement) {
-        successMessageElement.textContent = message;
-        successMessageElement.style.display = 'block';
-        setTimeout(() => {
-            successMessageElement.style.display = 'none';
-        }, 3000); // 3초 후 메시지 숨김
-    } else {
-        console.error('success message element not found.');
-    }
+    alert(message);
 }
 
 function getCookie(name) {
