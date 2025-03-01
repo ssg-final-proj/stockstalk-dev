@@ -226,32 +226,32 @@ button:hover {
 /* 주문 내역 테이블 열 너비 조정 */
 .order-history th:nth-child(1),
 .order-history td:nth-child(1) {
-  width: 21%; /* 종목명 */
+  width: 18%; /* 종목명 */
 }
 
 .order-history th:nth-child(2),
 .order-history td:nth-child(2) {
-  width: 16%; /* 주문 종류 */
+  width: 14%; /* 주문 종류 */
 }
 
 .order-history th:nth-child(3),
 .order-history td:nth-child(3) {
-  width: 21%; /* 주문 가격 */
+  width: 18%; /* 주문 가격 */
 }
 
 .order-history th:nth-child(4),
 .order-history td:nth-child(4) {
-  width: 10%; /* 수량 */
+  width: 12%; /* 수량 */
 }
 
 .order-history th:nth-child(5),
 .order-history td:nth-child(5) {
-  width: 13%; /* 상태 */
+  width: 14%; /* 상태 */
 }
 
 .order-history th:nth-child(6),
 .order-history td:nth-child(6) {
-  width: 19%; /* 주문 시간 */
+  width: 24%; /* 주문 시간 */
 }
 
 /* 반응형 디자인 */
