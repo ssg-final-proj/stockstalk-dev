@@ -186,6 +186,7 @@ button:hover {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  table-layout: fixed; /* 테이블 레이아웃 고정 */
 }
 
 .order-history th,
@@ -206,34 +207,55 @@ button:hover {
 
 /* 주문일과 취소 버튼을 포함하는 td에 대한 스타일 */
 .order-history .order-date-and-cancel {
-  display: flex; /* Flexbox를 사용하여 가로로 배치 */
-  align-items: center; /* 세로 정렬 */
-  justify-content: flex-start; /* 왼쪽 정렬 */
-  white-space: nowrap; /* 줄 바꿈 방지 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 내용 양쪽으로 정렬 */
+  white-space: nowrap;
+  width: 100%; /* 추가 */
 }
 
 .order-history .order-date-and-cancel button {
-  margin-left: 5px; /* 주문일과의 간격 조절 */
+  margin-left: 0px;
 }
 
-.order-history button {
-  background-color: #e53e3e;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: background-color 0.3s ease;
-  margin-left: 5px;
-  /* 취소 버튼과의 간격 */
+/* 주문 내역 테이블 열 너비 조정 */
+.order-history th:nth-child(1),
+.order-history td:nth-child(1) {
+  width: 20%; /* 종목명 */
 }
 
-.order-history button:hover {
-  background-color: #c53030;
+.order-history th:nth-child(2),
+.order-history td:nth-child(2) {
+  width: 10%; /* 주문 종류 */
 }
 
+.order-history th:nth-child(3),
+.order-history td:nth-child(3) {
+  width: 20%; /* 주문 가격 */
+}
 
+.order-history th:nth-child(4),
+.order-history td:nth-child(4) {
+  width: 10%; /* 수량 */
+}
+
+.order-history th:nth-child(5),
+.order-history td:nth-child(5) {
+  width: 15%; /* 상태 */
+}
+
+.order-history th:nth-child(6),
+.order-history td:nth-child(6) {
+  width: 20%; /* 주문 시간 */
+}
+
+.order-history th:nth-child(7),
+.order-history td:nth-child(7) {
+  width: 5%; /* 취소 버튼 */
+  text-align: center;
+}
+
+/* 반응형 디자인 */
 @media (max-width: 768px) {
   header h1 {
       font-size: 1.5rem;
@@ -241,10 +263,8 @@ button:hover {
 
   button {
       width: auto;
-      /* Change from 100% to auto */
       margin-top: 5px;
       margin-left: 5px;
-      /* Add margin for mobile view */
   }
 
   .navbar {
@@ -290,66 +310,6 @@ button:hover {
       font-weight: 500;
       color: #4a5568;
   }
-}
-
-/* 주문 내역 테이블 스타일 */
-.order-history table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.order-history th,
-.order-history td {
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.order-history th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-}
-
-.order-history tbody tr:hover {
-  background-color: #f9f9f9;
-}
-
-/* 주문일과 취소 버튼을 포함하는 td에 대한 스타일 */
-.order-history .order-date-and-cancel {
-  white-space: nowrap;
-  /* 내용이 줄 바꿈되지 않도록 설정 */
-  width: 1%;
-  /* 내용에 맞춰 최소 너비 유지 */
-}
-
-.order-history button {
-  background-color: #e53e3e;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: background-color 0.3s ease;
-  margin-left: 5px;
-  /* 취소 버튼과의 간격 */
-}
-
-.order-history button:hover {
-  background-color: #c53030;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-
-  button {
-      width: auto;
-      /* Change from 100% to auto */
-      margin-top: 5px;
-      margin-left: 5px;
-      /* Add margin for mobile view */
-  }
 
   .order-history th,
   .order-history td {
@@ -358,19 +318,15 @@ button:hover {
   }
 
   .order-history .order-date-and-cancel {
-    display: block; /* 블록 요소로 변경하여 세로로 배치 */
-  }
-  .order-history .order-date-and-cancel button {
-      margin-left: 0; /* 왼쪽 여백 제거 */
-      margin-top: 5px; /* 상단 여백 추가 */
+      display: flex; /* flex로 변경 */
+      flex-direction: column; /* flex item을 세로로 배치 */
+      align-items: flex-start; /* 왼쪽 정렬 */
+      white-space: nowrap;
   }
 
-  .order-history button {
+  .order-history .order-date-and-cancel button {
       margin-left: 0;
-      /* 왼쪽 여백 제거 */
       margin-top: 5px;
-      /* 상단 여백 추가 */
       width: auto;
-      /* 버튼 너비 자동 조정 */
   }
 }
