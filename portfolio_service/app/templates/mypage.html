@@ -91,7 +91,7 @@
                 </thead>
                 <tbody>
                     {% for order, stock_name in today_orders %}
-                    <tr data-order-id="{{ order.id }}">
+                    <tr data-order-time="{{ order.created_at }}">
                         <td>{{ stock_name }}</td>
                         <td class="{% if order.order_type == 'BUY' %}order-type-buy{% else %}order-type-sell{% endif %}">
                             {{ "매수" if order.order_type == "BUY" else "매도" }}
@@ -100,17 +100,17 @@
                         <td>{{ order.quantity|int }}주</td>
                         <td>
                             {% if order.status == "PENDING" %}
-                            대기 중
+                                대기 중
                             {% elif order.status == "COMPLETED" %}
-                            완료됨
+                                완료됨
                             {% else %}
-                            취소됨
+                                취소됨
                             {% endif %}
                         </td>
                         <td class="order-date-and-cancel">
                             {{ order.created_at }}
                             {% if order.status == "PENDING" %}
-                            <button onclick="cancelOrder({{ order.order_id }})">취소</button>
+                                <button onclick="cancelOrder('{{ order.created_at }}')">취소</button>
                             {% endif %}
                         </td>
                     </tr>
@@ -123,43 +123,42 @@
         </section>
         
         <script>
-            function cancelOrder(orderId) {
-                console.log("Cancelling order with ID:", orderId); // 로그 추가
-                fetch('/api/cancel-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token() }}'  // CSRF 토큰을 헤더에 추가
-                    },
-                    body: JSON.stringify({
-                        order_id: orderId
-                    })
+        function cancelOrder(orderTime) {
+            console.log("Cancelling order with time:", orderTime);
+            fetch('/api/cancel-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    order_time: orderTime  // 주문 ID 대신 주문 시간을 전송
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        // HTTP 상태 코드가 200-299 범위가 아니면 에러 처리
-                        console.error('HTTP error!', response.status, response.statusText);
-                        throw new Error('Network response was not ok ' + response.statusText);
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('HTTP error!', response.status, response.statusText);
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    // 취소된 주문 행을 화면에서 제거 (주문 시간을 사용하여 찾음)
+                    const orderRow = document.querySelector(`tr[data-order-time="${orderTime}"]`);
+                    if (orderRow) {
+                        orderRow.remove();
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.message) {
-                        alert(data.message);
-                        // 취소된 주문 행을 화면에서 제거
-                        const orderRow = document.querySelector(`tr[data-order-id="${orderId}"]`);
-                        if (orderRow) {
-                            orderRow.remove();
-                        }
-                    } else if (data.error) {
-                        alert(data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error('주문 취소 중 오류 발생:', error, "Order ID:", orderId); // 오류 로그에 orderId 추가
-                    alert('주문 취소 중 오류가 발생했습니다.');
-                });
-            }
-        </script>
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('주문 취소 중 오류 발생:', error, "Order Time:", orderTime);
+                alert('주문 취소 중 오류가 발생했습니다.');
+            });
+        }
+        </script>        
 </body>
 </html>

@@ -5,7 +5,7 @@ import redis
 from flask import Blueprint, render_template, jsonify, request
 from sqlalchemy.exc import SQLAlchemyError
 from db import db, User, Order, Portfolio, Stock
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from pytz import timezone
 
 # 로그 설정
@@ -185,31 +185,48 @@ def update_user_data(kakao_id, new_data):
 @portfolio.route("/api/cancel-order", methods=["POST"])
 def cancel_order():
     data = request.get_json()
-    order_id = data.get('order_id')
+    created_at_str = data.get('order_time')
     kakao_id = request.cookies.get('kakao_id')
 
-    logger.info(f"Attempting to cancel order. order_id: {order_id}, kakao_id: {kakao_id}") # 로그 추가
+    logger.info(f"Attempting to cancel order with time: {created_at_str}, kakao_id: {kakao_id}")
 
-    if not order_id or not kakao_id:
-        logger.warning(f"Missing order_id or kakao_id. order_id: {order_id}, kakao_id: {kakao_id}")
-        return jsonify({"error": "주문 ID와 로그인이 필요합니다."}), 400
+    if not created_at_str or not kakao_id:
+        logger.warning(f"Missing created_at or kakao_id. created_at: {created_at_str}, kakao_id: {kakao_id}")
+        return jsonify({"error": "주문 시간과 로그인이 필요합니다."}), 400
 
     try:
+        # 문자열 형태의 created_at을 datetime 객체로 변환 (timezone 정보 포함)
+        created_at = datetime.strptime(created_at_str, '%Y-%m-%d %H:%M:%S').replace(tzinfo=timezone('Asia/Seoul'))
+
         with db.session() as session:
-            order = session.query(Order).filter(Order.id == order_id, Order.kakao_id == kakao_id, Order.status == 'PENDING').first()
+            # 주어진 시간에서 1초 전후의 범위 내에서 주문을 검색
+            time_range_start = created_at - timedelta(seconds=1)
+            time_range_end = created_at + timedelta(seconds=1)
+
+            order = session.query(Order).filter(
+                Order.kakao_id == kakao_id,
+                Order.created_at >= time_range_start,
+                Order.created_at <= time_range_end,
+                Order.status == 'PENDING'
+            ).first()
+
             if not order:
-                logger.warning(f"Order not found or not PENDING. order_id: {order_id}, kakao_id: {kakao_id}")
+                logger.warning(f"Order not found or not PENDING. created_at: {created_at_str}, kakao_id: {kakao_id}")
                 return jsonify({"error": "취소할 주문을 찾을 수 없습니다."}), 404
 
             order.status = 'CANCELLED'
             session.commit()
-            logger.info(f"Order cancelled successfully. order_id: {order_id}, kakao_id: {kakao_id}")
-            return jsonify({"message": "주문이 취소되었습니다.", "order_id": order_id}), 200
+            logger.info(f"Order cancelled successfully. created_at: {created_at_str}, kakao_id: {kakao_id}")
+            return jsonify({"message": "주문이 취소되었습니다.", "created_at": created_at_str}), 200
 
+    except ValueError as e:
+        logger.error(f"Invalid datetime format: {created_at_str}, {e}", exc_info=True)
+        return jsonify({"error": "잘못된 날짜 형식입니다."}), 400
     except SQLAlchemyError as e:
         session.rollback()
-        logger.error(f"Database error in cancel_order: {str(e)}, order_id: {order_id}, kakao_id: {kakao_id}", exc_info=True)
+        logger.error(f"Database error in cancel_order: {str(e)}, created_at: {created_at_str}, kakao_id: {kakao_id}", exc_info=True)
         return jsonify({"error": "데이터베이스 오류가 발생했습니다."}), 500
     except Exception as e:
-        logger.error(f"Unexpected error in cancel_order: {str(e)}, order_id: {order_id}, kakao_id: {kakao_id}", exc_info=True)
+        logger.error(f"Unexpected error in cancel_order: {str(e)}, created_at: {created_at_str}, kakao_id: {kakao_id}", exc_info=True)
         return jsonify({"error": "예기치 않은 오류가 발생했습니다."}), 500
+
