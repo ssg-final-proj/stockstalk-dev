@@ -186,23 +186,29 @@ button:hover {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
   table-layout: fixed; /* 테이블 레이아웃 고정 */
 }
 
 .order-history th,
 .order-history td {
-  padding: 8px 12px;
+  padding: 10px;
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .order-history th {
-  background-color: #f2f2f2;
-  font-weight: bold;
+  background-color: #f7fafc;
+  font-weight: 600;
+  color: #4a5568;
+  text-transform: uppercase;
 }
 
 .order-history tbody tr:hover {
-  background-color: #f9f9f9;
+  background-color: #f0f4f8;
 }
 
 /* 주문일과 취소 버튼을 포함하는 td에 대한 스타일 */
@@ -220,7 +226,7 @@ button:hover {
 /* 주문 내역 테이블 열 너비 조정 */
 .order-history th:nth-child(1),
 .order-history td:nth-child(1) {
-  width: 22%; /* 종목명 */
+  width: 21%; /* 종목명 */
 }
 
 .order-history th:nth-child(2),
@@ -230,7 +236,7 @@ button:hover {
 
 .order-history th:nth-child(3),
 .order-history td:nth-child(3) {
-  width: 22%; /* 주문 가격 */
+  width: 21%; /* 주문 가격 */
 }
 
 .order-history th:nth-child(4),
@@ -240,12 +246,12 @@ button:hover {
 
 .order-history th:nth-child(5),
 .order-history td:nth-child(5) {
-  width: 15%; /* 상태 */
+  width: 13%; /* 상태 */
 }
 
 .order-history th:nth-child(6),
 .order-history td:nth-child(6) {
-  width: 15%; /* 주문 시간 */
+  width: 19%; /* 주문 시간 */
 }
 
 /* 반응형 디자인 */
@@ -311,12 +317,12 @@ button:hover {
   }
 
   .order-history .order-date-and-cancel {
-    display: block; /* 블록 요소로 변경하여 세로로 배치 */
+    display: block;
   }
 
   .order-history .order-date-and-cancel button {
-    margin-left: 0; /* 왼쪽 여백 제거 */
-    margin-top: 5px; /* 상단 여백 추가 */
-    width: auto; /* 버튼 너비 자동 조정 */
+    margin-left: 0;
+    margin-top: 5px;
+    width: auto;
   }
 }
