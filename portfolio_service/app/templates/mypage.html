@@ -129,7 +129,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token() }}'
+                    //'X-CSRFToken': '{{ csrf_token() }}'  // CSRF 토큰 헤더 삭제
                 },
                 body: JSON.stringify({
                     order_time: orderTime  // 주문 ID 대신 주문 시간을 전송
@@ -159,6 +159,6 @@
                 alert('주문 취소 중 오류가 발생했습니다.');
             });
         }
-        </script>        
+        </script>            
 </body>
 </html>
