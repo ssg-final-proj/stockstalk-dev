@@ -184,7 +184,8 @@ def update_user_data(kakao_id, new_data):
 
 @portfolio.route("/api/cancel-order", methods=["POST"])
 def cancel_order():
-    order_id = request.json.get('order_id')
+    data = request.json
+    order_id = data.get('order_id')
     kakao_id = request.cookies.get('kakao_id')
 
     if not order_id or not kakao_id:
@@ -196,7 +197,7 @@ def cancel_order():
             if order:
                 order.status = 'CANCELLED'
                 session.commit()
-                return jsonify({"message": "주문이 취소되었습니다."}), 200
+                return jsonify({"message": "주문이 취소되었습니다.", "order_id": order_id}), 200
             else:
                 return jsonify({"error": "취소할 주문을 찾을 수 없습니다."}), 404
     except SQLAlchemyError as e:

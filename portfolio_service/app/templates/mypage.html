@@ -91,7 +91,7 @@
                     </thead>
                     <tbody>
                         {% for order, stock_name in today_orders %}
-                            <tr>
+                            <tr data-order-id="{{ order.id }}">
                                 <td>{{ stock_name }}</td>
                                 <td class="{% if order.order_type == 'BUY' %}order-type-buy{% else %}order-type-sell{% endif %}">
                                     {{ "매수" if order.order_type == "BUY" else "매도" }}
@@ -107,14 +107,14 @@
                                         취소됨
                                     {% endif %}
                                 </td>
-                                <td>{{ order.created_at }}</td>
-                                <td>
+                                <td style="white-space: nowrap;">
+                                    {{ order.created_at }}
                                     {% if order.status == "PENDING" %}
                                         <button onclick="cancelOrder({{ order.order_id }})">취소</button>
                                     {% endif %}
                                 </td>
                             </tr>
-                    {% endfor %}
+                        {% endfor %}
                     </tbody>
                 </table>
             {% else %}
@@ -135,7 +135,11 @@
             .then(data => {
                 if (data.message) {
                     alert(data.message);
-                    location.reload();
+                    // 취소된 주문 행을 화면에서 제거
+                    const orderRow = document.querySelector(`tr[data-order-id="${data.order_id}"]`);
+                    if (orderRow) {
+                        orderRow.remove();
+                    }
                 } else if (data.error) {
                     alert(data.error);
                 }
@@ -145,6 +149,6 @@
                 alert('주문 취소 중 오류가 발생했습니다.');
             });
         }
-    </script>
+    </script>    
 </body>
 </html>
