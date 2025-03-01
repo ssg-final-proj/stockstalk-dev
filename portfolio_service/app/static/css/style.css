@@ -186,7 +186,6 @@ button:hover {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  table-layout: fixed; /* 테이블 레이아웃 고정 */
 }
 
 .order-history th,
@@ -211,122 +210,96 @@ button:hover {
   align-items: center;
   justify-content: space-between; /* 내용 양쪽으로 정렬 */
   white-space: nowrap;
-  width: 100%; /* 추가 */
 }
 
 .order-history .order-date-and-cancel button {
-  margin-left: 0px;
+  margin-left: 10px; /* 버튼 왼쪽 여백 추가 */
 }
 
-/* 주문 내역 테이블 열 너비 조정 */
-.order-history th:nth-child(1),
-.order-history td:nth-child(1) {
-  width: 20%; /* 종목명 */
+.order-history button {
+  background-color: #e53e3e;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.3s ease;
 }
 
-.order-history th:nth-child(2),
-.order-history td:nth-child(2) {
-  width: 10%; /* 주문 종류 */
-}
-
-.order-history th:nth-child(3),
-.order-history td:nth-child(3) {
-  width: 20%; /* 주문 가격 */
-}
-
-.order-history th:nth-child(4),
-.order-history td:nth-child(4) {
-  width: 10%; /* 수량 */
-}
-
-.order-history th:nth-child(5),
-.order-history td:nth-child(5) {
-  width: 15%; /* 상태 */
-}
-
-.order-history th:nth-child(6),
-.order-history td:nth-child(6) {
-  width: 20%; /* 주문 시간 */
-}
-
-.order-history th:nth-child(7),
-.order-history td:nth-child(7) {
-  width: 5%; /* 취소 버튼 */
-  text-align: center;
+.order-history button:hover {
+  background-color: #c53030;
 }
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   header h1 {
-      font-size: 1.5rem;
+    font-size: 1.5rem;
   }
 
   button {
-      width: auto;
-      margin-top: 5px;
-      margin-left: 5px;
+    width: auto;
+    margin-top: 5px;
+    margin-left: 5px;
   }
 
   .navbar {
-      position: static;
-      justify-content: center;
-      margin-top: 20px;
+    position: static;
+    justify-content: center;
+    margin-top: 20px;
   }
 
   section {
-      padding: 20px;
+    padding: 20px;
   }
 
   .user-info {
-      grid-template-columns: 1fr;
+    grid-template-columns: 1fr;
   }
 
   table,
   table tbody,
   table tr,
   table td {
-      display: block;
-      width: 100%;
+    display: block;
+    width: 100%;
   }
 
   table th {
-      display: none;
+    display: none;
   }
 
   table td {
-      text-align: right;
-      padding-left: 50%;
-      position: relative;
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
   }
 
   table td:before {
-      content: attr(data-label);
-      position: absolute;
-      left: 6px;
-      width: 45%;
-      padding-right: 10px;
-      white-space: nowrap;
-      text-align: left;
-      font-weight: 500;
-      color: #4a5568;
+    content: attr(data-label);
+    position: absolute;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 500;
+    color: #4a5568;
   }
 
   .order-history th,
   .order-history td {
-      padding: 6px 8px;
-      font-size: 0.8rem;
+    padding: 6px 8px;
+    font-size: 0.8rem;
   }
 
   .order-history .order-date-and-cancel {
-      display: flex; /* flex로 변경 */
-      flex-direction: column; /* flex item을 세로로 배치 */
-      align-items: flex-start; /* 왼쪽 정렬 */
-      white-space: nowrap;
+    display: block; /* 블록 요소로 변경하여 세로로 배치 */
   }
 
   .order-history .order-date-and-cancel button {
-      margin-left: 0;
-      margin-top: 5px;
-      width: auto;
+    margin-left: 0; /* 왼쪽 여백 제거 */
+    margin-top: 5px; /* 상단 여백 추가 */
+    width: auto; /* 버튼 너비 자동 조정 */
   }
 }
