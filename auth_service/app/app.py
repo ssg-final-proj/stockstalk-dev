@@ -1,6 +1,8 @@
 import os
 import sys
-from flask import Flask, render_template, jsonify
+import redis
+from flask import Flask, render_template
+from flask import jsonify
 from flask_login import LoginManager, login_required
 from flask_migrate import Migrate
 from logging.handlers import RotatingFileHandler
@@ -8,6 +10,7 @@ from dotenv import load_dotenv
 from config import current_config, ENV
 from flask_cors import CORS
 from sqlalchemy.sql import text
+from sqlalchemy.exc import SQLAlchemyError
 from flask_sqlalchemy import SQLAlchemy
 
 # 프로젝트 루트 디렉터리를 경로에 추가
@@ -60,10 +63,24 @@ def create_app():
         try:
             # 데이터베이스 연결 테스트
             with db.engine.connect() as connection:
-                db.session.execute(text("SELECT 1"))  # SQLAlchemy 세션을 사용해야 함
-            return jsonify({"status": "ready"}), 200
+                result = connection.execute(text("SELECT 1"))
+                result.fetchall()  # 결과 가져와야 함
+        except SQLAlchemyError as e:
+            errors["database"] = str(e)
+
+        # ✅ 2️⃣ Redis 연결 확인
+        try:
+            redis_host = os.getenv("REDIS_HOST", "localhost")
+            redis_port = int(os.getenv("REDIS_PORT", 6379))
+            redis_client = redis.StrictRedis(host=redis_host, port=redis_port, db=0)
+            redis_client.ping()
         except Exception as e:
-            return jsonify({"status": "not ready", "error": str(e)}), 500
+            errors["redis"] = str(e)
+
+        # ✅ 3️⃣ 상태 반환
+        if errors:
+            return jsonify({"status": "not ready", "errors": errors}), 500
+        return jsonify({"status": "ready"}), 200
     
     return app
 
