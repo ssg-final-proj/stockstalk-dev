@@ -85,7 +85,7 @@
                             <th>주문 가격</th>
                             <th>수량</th>
                             <th>상태</th>
-                            <th>주문일</th>
+                            <th>주문 시간</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -107,11 +107,13 @@
                                         취소됨
                                     {% endif %}
                                 </td>
-                                <td>{{ order.created_at }}</td>
                                 <td>
-                                    {% if order.status == "PENDING" %}
-                                        <button onclick="cancelOrder({{ order.order_id }})">취소</button>
-                                    {% endif %}
+                                    <div class="order-date-and-cancel">
+                                        {{ order.created_at }}
+                                        {% if order.status == "PENDING" %}
+                                            <button onclick="cancelOrder({{ order.order_id }})">취소</button>
+                                        {% endif %}
+                                    </div>
                                 </td>
                             </tr>
                     {% endfor %}
@@ -120,7 +122,7 @@
             {% else %}
                 <p>현재 주문 내역이 없습니다.</p>
             {% endif %}
-        </section>
+        </section>        
     </main>
     <script>
         function cancelOrder(orderId) {

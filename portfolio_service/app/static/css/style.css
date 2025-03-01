@@ -206,10 +206,14 @@ button:hover {
 
 /* 주문일과 취소 버튼을 포함하는 td에 대한 스타일 */
 .order-history .order-date-and-cancel {
-  white-space: nowrap;
-  /* 내용이 줄 바꿈되지 않도록 설정 */
-  width: 1%;
-  /* 내용에 맞춰 최소 너비 유지 */
+  display: flex; /* Flexbox를 사용하여 가로로 배치 */
+  align-items: center; /* 세로 정렬 */
+  justify-content: flex-start; /* 왼쪽 정렬 */
+  white-space: nowrap; /* 줄 바꿈 방지 */
+}
+
+.order-history .order-date-and-cancel button {
+  margin-left: 5px; /* 주문일과의 간격 조절 */
 }
 
 .order-history button {
@@ -354,10 +358,11 @@ button:hover {
   }
 
   .order-history .order-date-and-cancel {
-      display: block;
-      /* 모바일에서는 블록 요소로 변경 */
-      width: 100%;
-      /* 전체 너비 사용 */
+    display: block; /* 블록 요소로 변경하여 세로로 배치 */
+  }
+  .order-history .order-date-and-cancel button {
+      margin-left: 0; /* 왼쪽 여백 제거 */
+      margin-top: 5px; /* 상단 여백 추가 */
   }
 
   .order-history button {
