@@ -1,12 +1,13 @@
 import os
 import sys
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask_login import LoginManager, login_required
 from flask_migrate import Migrate
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 from config import current_config, ENV
 from flask_cors import CORS
+from sqlalchemy import text
 
 # 프로젝트 루트 디렉터리를 경로에 추가
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -47,7 +48,24 @@ def create_app():
     def main():
         return render_template('auth.html')
 
+    @app.route('/healthz', methods=['GET'])
+    def health_check():
+        """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""
+        return jsonify({"status": "ok"}), 200
+
+    @app.route('/readiness', methods=['GET'])
+    def readiness_check():
+        """Readiness Probe - 애플리케이션이 준비되었는지 확인"""
+        try:
+            # 데이터베이스 연결 테스트
+            with db.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return jsonify({"status": "ready"}), 200
+        except Exception as e:
+            return jsonify({"status": "not ready", "error": str(e)}), 500
+
     return app
+
 
 if __name__ == "__main__":
     # 로그 핸들러 설정
