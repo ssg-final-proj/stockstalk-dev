@@ -52,6 +52,8 @@ def create_app():
         """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""
         return "OK", 200
 
+    return app
+
 if __name__ == "__main__":
     # 로그 핸들러 설정
     handler = RotatingFileHandler('app.log', maxBytes=2000, backupCount=5)
