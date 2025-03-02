@@ -48,50 +48,24 @@ def kakaoLoginLogic():
 @auth.route("/kakaoLoginLogicRedirect", methods=["GET"])
 def kakaoLoginLogicRedirect():
     """ 카카오 로그인 처리 후 사용자 정보 Redis에 저장 """
-    # code = request.args.get("code")
-    # if not code:
-    #     return "카카오 로그인 인증 코드가 없습니다.", 400
-
-    # # 카카오에서 액세스 토큰 가져오기
-    # response = requests.post(
-    #     "https://kauth.kakao.com/oauth/token",
-    #     data={
-    #         "grant_type": "authorization_code",
-    #         "client_id": REST_API_KEY,
-    #         "redirect_uri": REDIRECT_URI,
-    #         "code": code,
-    #     },
-    # )
-
-    # access_token = response.json().get("access_token")
-    # if not access_token:
-    #     return "Access token 발급 실패.", 500
-    ##################################################
     code = request.args.get("code")
     if not code:
-        print("❌ 카카오 로그인 코드 없음")
         return "카카오 로그인 인증 코드가 없습니다.", 400
-    
-    print(f"✅ 카카오 로그인 요청 수신: code={code}")
 
-    token_url = "https://kauth.kakao.com/oauth/token"
-    token_data = {
-        "grant_type": "authorization_code",
-        "client_id": REST_API_KEY,
-        "redirect_uri": REDIRECT_URI,
-        "code": code,
-    }
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    # 카카오에서 액세스 토큰 가져오기
+    response = requests.post(
+        "https://kauth.kakao.com/oauth/token",
+        data={
+            "grant_type": "authorization_code",
+            "client_id": REST_API_KEY,
+            "redirect_uri": REDIRECT_URI,
+            "code": code,
+        },
+    )
 
-    print(f"🔄 카카오 액세스 토큰 요청 데이터: {token_data}")
-
-    response = requests.post(token_url, headers=headers, data=token_data)
-
-    print(f"✅ 카카오 액세스 토큰 응답: {response.status_code} - {response.text}")
-
-    if response.status_code != 200:
-        return f"카카오 액세스 토큰 발급 실패. 응답: {response.text}", 500
-    #####################################################333
+    access_token = response.json().get("access_token")
+    if not access_token:
+        return "Access token 발급 실패.", 500
 
     # 카카오에서 사용자 정보 가져오기
     kakao_user_info = requests.get(
