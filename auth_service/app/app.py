@@ -50,7 +50,7 @@ def create_app():
     @app.route('/healthz', methods=['GET'])
     def health_check():
         """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""
-        return jsonify({"status": "ok"}), 200
+        return "OK", 200
 
 if __name__ == "__main__":
     # 로그 핸들러 설정
