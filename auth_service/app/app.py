@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask_login import LoginManager, login_required
 from flask_migrate import Migrate
 from logging.handlers import RotatingFileHandler
@@ -50,7 +50,7 @@ def create_app():
     @app.route('/healthz', methods=['GET'])
     def health_check():
         """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""
-        return "OK", 200
+        return jsonify({"status": "ok"}), 200 
 
     return app
 
