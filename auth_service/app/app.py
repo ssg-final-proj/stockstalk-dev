@@ -1,6 +1,7 @@
 import os
 import sys
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, Response
+import json
 from flask_login import LoginManager, login_required
 from flask_migrate import Migrate
 from logging.handlers import RotatingFileHandler
@@ -50,8 +51,8 @@ def create_app():
     @app.route('/healthz', methods=['GET'])
     def health_check():
         """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""
-        with app.app_context():  # Flask 애플리케이션 컨텍스트 활성화
-            return jsonify({"status": "ok"}), 200  
+        response_data = json.dumps({"status": "ok"})  # JSON으로 변환
+            return Response(response=response_data, status=200, mimetype="application/json")
 
     return app
 
