@@ -50,7 +50,8 @@ def create_app():
     @app.route('/healthz', methods=['GET'])
     def health_check():
         """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""
-        return jsonify({"status": "ok"}), 200 
+        with app.app_context():  # Flask 애플리케이션 컨텍스트 활성화
+            return jsonify({"status": "ok"}), 200  
 
     return app
 
