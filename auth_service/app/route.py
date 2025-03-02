@@ -67,7 +67,7 @@ def kakaoLoginLogicRedirect():
     # if not access_token:
     #     return "Access token 발급 실패.", 500
     ##################################################
-        code = request.args.get("code")
+    code = request.args.get("code")
     if not code:
         print("❌ 카카오 로그인 코드 없음")
         return "카카오 로그인 인증 코드가 없습니다.", 400
