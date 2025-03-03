@@ -31,10 +31,27 @@
                 <p><strong>닉네임:</strong> {{ user.username }}</p>
                 <p><strong>보유 원화:</strong> {{ "{:,.0f}".format(user['seed_krw']) }} KRW</p>
                 <p><strong>보유 달러:</strong> {{ "{:,.2f}".format(user['seed_usd']) }} USD</p>
+                
+                <h2>전체 투자 성과</h2>
+                <p><strong>전체 수익률:</strong> 
+                    {% if profit_rate_total is defined and profit_rate_total is not none %}
+                        {{ "{:,.2f}".format(profit_rate_total) }}%
+                    {% else %}
+                        데이터 없음
+                    {% endif %}
+                </p>
+                <p><strong>현재 순위:</strong> 
+                    {% if p_rank is defined and p_rank is not none %}
+                        {{ p_rank }}위
+                    {% else %}
+                        데이터 없음
+                    {% endif %}
+                </p>
             {% else %}
                 <p>로그인이 필요합니다.</p>
             {% endif %}
         </section>
+
         <section class="portfolio">
             <h2>보유 종목</h2>
             {% if portfolio %}
@@ -67,13 +84,14 @@
                                     {% endif %}
                                 </td>                                                            
                             </tr>
-                    {% endfor %}          
+                        {% endfor %}          
                     </tbody>
                 </table>
             {% else %}
                 <p>보유 종목이 없습니다.</p>
             {% endif %}
         </section>
+
         <section class="order-history">
             <h2>주문 내역</h2>
             {% if today_orders %}
@@ -115,7 +133,7 @@
                                     </div>
                                 </td>
                             </tr>
-                    {% endfor %}
+                        {% endfor %}
                     </tbody>
                 </table>
             {% else %}
@@ -123,6 +141,7 @@
             {% endif %}
         </section>        
     </main>
+
     <script>
         function cancelOrder(orderId) {
             fetch('/api/cancel-order', {

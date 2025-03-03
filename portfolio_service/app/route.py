@@ -3,6 +3,7 @@ import logging
 import json
 import redis
 from flask import Blueprint, render_template, jsonify, request
+from sqlalchemy.sql import text
 from sqlalchemy.exc import SQLAlchemyError
 from db import db, User, Order, Portfolio, Stock
 from datetime import datetime, date
@@ -62,21 +63,46 @@ def mypage():
     if not user_data:
         return render_template("mypage.html", error="로그인이 필요합니다.")
 
-    # Redis에서 실시간 수익률 가져오기
+    try:
+        with db.session() as session:
+            # ✅ 데이터베이스에서 전체 수익률과 순위 가져오기
+            query = text("""
+                SELECT profit_rate_total, p_rank
+                FROM portfolio_db.portfolio_ranking
+                WHERE kakao_id = :kakao_id
+            """)
+            result = session.execute(query, {"kakao_id": kakao_id}).fetchone()
+
+            # 결과 값 할당 (데이터 없을 경우 기본값 설정)
+            if result:
+                profit_rate_total, p_rank = result
+                profit_rate_total = round(float(profit_rate_total), 2) if profit_rate_total is not None else 0.0
+                p_rank = int(p_rank) if p_rank is not None else None
+            else:
+                profit_rate_total, p_rank = 0.0, None  
+
+    except SQLAlchemyError as e:
+        logger.error(f"❌ Database error in mypage: {str(e)}")
+        profit_rate_total, p_rank = 0.0, None  # 오류 발생 시 기본값
+
+    # ✅ Redis에서 종목별 실시간 수익률 가져오기
     for item, stock_name in portfolio:
         profit_rate = redis_client_profit.get(f'profit_rate:{kakao_id}:{item.stock_symbol}')
         if profit_rate:
             item.real_time_profit_rate = float(profit_rate)
         else:
             item.real_time_profit_rate = item.profit_rate
-            
+
+    # ✅ 한국 시간대 설정 유지
     KST = timezone('Asia/Seoul')
-    
+
     return render_template(
         "mypage.html",
         user=user_data,
         portfolio=portfolio,
         today_orders=today_orders,
+        profit_rate_total=profit_rate_total,  # ✅ 전체 수익률 추가
+        p_rank=p_rank,  # ✅ 순위 추가
         KST=KST
     )
 
@@ -128,8 +154,26 @@ def mypage_api():
     if not user_data:
         return jsonify({"error": "사용자를 찾을 수 없습니다."}), 404
 
+    try:
+        with db.session() as session:
+            ranking_data = session.execute(
+                text("SELECT profit_rate_total, p_rank FROM portfolio_db.portfolio_ranking WHERE kakao_id = :kakao_id"),
+                {"kakao_id": kakao_id}
+            ).fetchone()
+
+            if ranking_data:
+                total_profit_rate = round(float(ranking_data[0]), 2) if ranking_data[0] is not None else 0.0
+                ranking = int(ranking_data[1]) if ranking_data[1] is not None else None
+            else:
+                total_profit_rate, ranking = 0.0, None
+    except SQLAlchemyError as e:
+        logger.error(f"Database error in fetching ranking data: {str(e)}")
+        total_profit_rate, ranking = 0.0, None
+
     return jsonify({
         "user": user_data,
+        "total_profit_rate": total_profit_rate,
+        "ranking": ranking,
         "portfolio": [
             {
                 "stock_symbol": p.Portfolio.stock_symbol,
@@ -143,14 +187,14 @@ def mypage_api():
         ],
         "today_orders": [
             {
-                "order_id": order.Order.id,  # 주문 ID 추가
+                "order_id": order.Order.id,
                 "stock_symbol": order.Order.stock_symbol,
                 "stock_name": order.stock_name,
                 "order_type": order.Order.order_type,
                 "target_price": order.Order.target_price,
                 "quantity": order.Order.quantity,
                 "status": order.Order.status,
-                "created_at": order.Order.created_at.astimezone(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')  # KST로 변경
+                "created_at": order.Order.created_at.astimezone(timezone('Asia/Seoul')).strftime('%Y-%m-%d %H:%M:%S')
             }
             for order in today_orders
         ]
