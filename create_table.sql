@@ -51,6 +51,14 @@ CREATE TABLE IF NOT EXISTS portfolio_db.orders (
     INDEX idx_stock_symbol (stock_symbol)
 );
 
+-- ✅ portfolio_db.portfolio_ranking 테이블 생성 (순위 저장용)
+CREATE TABLE IF NOT EXISTS portfolio_db.portfolio_ranking (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    kakao_id VARCHAR(20) NOT NULL UNIQUE,
+    profit_rate_total FLOAT DEFAULT 0.0,
+    p_rank INT
+);
+
 -- exchange_schema.exchanges 테이블 생성 (변경 없음)
 CREATE TABLE IF NOT EXISTS exchange_db.exchanges (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -62,3 +70,4 @@ CREATE TABLE IF NOT EXISTS exchange_db.exchanges (
     total_value FLOAT NOT NULL,
     exchange_date DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
