@@ -3,12 +3,13 @@ CREATE SCHEMA IF NOT EXISTS auth_db;
 CREATE SCHEMA IF NOT EXISTS portfolio_db;
 CREATE SCHEMA IF NOT EXISTS exchange_db;
 
--- auth_schema.users 테이블 생성 (변경 없음)
+-- auth_db.users 테이블 생성 (✅ email_verified 필드 추가됨)
 CREATE TABLE IF NOT EXISTS auth_db.users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     kakao_id VARCHAR(20) UNIQUE,
     username VARCHAR(80) NOT NULL UNIQUE,
     email VARCHAR(150) UNIQUE,
+    email_verified BOOLEAN DEFAULT FALSE, -- ✅ 이메일 검증 여부 필드 추가
     seed_krw FLOAT DEFAULT 0.0,
     seed_usd FLOAT DEFAULT 0.0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS auth_db.users (
     last_seed_update DATETIME
 );
 
--- portfolio_schema.stocks 테이블 생성 
+-- portfolio_db.stocks 테이블 생성
 CREATE TABLE IF NOT EXISTS portfolio_db.stocks (
     id INT PRIMARY KEY AUTO_INCREMENT,
     stock_symbol VARCHAR(50) NOT NULL UNIQUE,
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS portfolio_db.stocks (
     market ENUM('DOMESTIC', 'INTERNATIONAL') NOT NULL
 );
 
--- portfolio_schema.portfolios 테이블 생성
+-- portfolio_db.portfolios 테이블 생성
 CREATE TABLE IF NOT EXISTS portfolio_db.portfolios (
     id INT PRIMARY KEY AUTO_INCREMENT,
     kakao_id VARCHAR(20) NOT NULL,
@@ -37,7 +38,7 @@ CREATE TABLE IF NOT EXISTS portfolio_db.portfolios (
     INDEX idx_kakao_id_stock_symbol (kakao_id, stock_symbol)
 );
 
--- portfolio_schema.orders 테이블 생성 
+-- portfolio_db.orders 테이블 생성
 CREATE TABLE IF NOT EXISTS portfolio_db.orders (
     id INT PRIMARY KEY AUTO_INCREMENT,
     kakao_id VARCHAR(20) NOT NULL,
@@ -59,7 +60,7 @@ CREATE TABLE IF NOT EXISTS portfolio_db.portfolio_ranking (
     p_rank INT
 );
 
--- exchange_schema.exchanges 테이블 생성 (변경 없음)
+-- exchange_db.exchanges 테이블 생성
 CREATE TABLE IF NOT EXISTS exchange_db.exchanges (
     id INT PRIMARY KEY AUTO_INCREMENT,
     kakao_id VARCHAR(20) NOT NULL,
@@ -70,4 +71,3 @@ CREATE TABLE IF NOT EXISTS exchange_db.exchanges (
     total_value FLOAT NOT NULL,
     exchange_date DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
