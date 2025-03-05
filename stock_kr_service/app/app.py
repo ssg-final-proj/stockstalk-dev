@@ -201,14 +201,14 @@ def create_app():
         if (kakao_id := request.cookies.get('kakao_id')):
             return redirect(f'http://www.stockstalk.store:8003')  # 로그인된 사용자는 마이페이지로 리디렉션
         else:
-            return redirect(f'http://www.stockstalk.store:8001/auth')  # 로그인 안 된 사용자는 로그인 페이지로 리디렉션
+            return redirect(f'http://www.stockstalk.store/auth')  # 로그인 안 된 사용자는 로그인 페이지로 리디렉션
         
     @app.route('/exchange')
     def exchange():
         if (kakao_id := request.cookies.get('kakao_id')):
             return redirect(f'http://www.stockstalk.store:8004')
         else:
-            return redirect(f'http://www.stockstalk.store:8001/auth')
+            return redirect(f'http://www.stockstalk.store/auth')
     
     @app.route('/api/check-login', methods=['GET'])
     def check_login():
@@ -355,6 +355,22 @@ def create_app():
                 return jsonify({"error": str(e)}), 500
 
         return render_template('stock_kr_detail.html', code=code)
+        
+    @app.route('/healthz', methods=['GET'])
+    def health_check():
+        """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""
+        return jsonify({"status": "ok"}), 200
+
+    @app.route('/readiness', methods=['GET'])
+    def readiness_check():
+        """Readiness Probe - 애플리케이션이 준비되었는지 확인"""
+        try:
+            # 데이터베이스 연결 테스트
+            with db.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return jsonify({"status": "ready"}), 200
+        except Exception as e:
+            return jsonify({"status": "not ready", "error": str(e)}), 500
 
     return app
 
