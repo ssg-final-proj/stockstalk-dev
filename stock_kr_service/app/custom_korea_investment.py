@@ -1,10 +1,9 @@
-import mojito
+import requests
+from mojito.koreainvestment import KoreaInvestment
 
-class CustomKoreaInvestment(mojito.KoreaInvestment):
+class CustomKoreaInvestment(KoreaInvestment):
     def __init__(self, api_key, api_secret, acc_no):
-        # Mojito의 __init__ 메서드 호출
         super().__init__(api_key=api_key, api_secret=api_secret, acc_no=acc_no)
-        # 필요한 추가 초기화 코드 작성
 
     def issue_access_token(self):
         path = "oauth2/tokenP"
@@ -19,4 +18,7 @@ class CustomKoreaInvestment(mojito.KoreaInvestment):
             "appkey": self.api_key,
             "appsecret": self.api_secret
         }
-        return self._send_request("POST", url, headers=headers, data=data)
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code != 200:
+            raise Exception(f"Failed to issue access token: {response.status_code}, {response.text}")
+        return response.json()
