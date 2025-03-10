@@ -1,5 +1,5 @@
 import os
-import mojito
+from custom_korea_investment import CustomKoreaInvestment as KoreaInvestment
 
 def create_broker():
     key_path = os.getenv("KOREA_INVESTMENT_KEY_PATH")
@@ -13,9 +13,8 @@ def create_broker():
         secret = lines[1].strip()   # 두 번째 줄: Secret Key
         acc_no = lines[2].strip()   # 세 번째 줄: Account Number
 
-    return mojito.KoreaInvestment(
-        api_key=key,       # app_key → api_key
-        api_secret=secret, # app_secret → api_secret
+    return KoreaInvestment(  # ✅ 커스텀 클래스 사용
+        api_key=key,
+        api_secret=secret,
         acc_no=acc_no
     )
-
