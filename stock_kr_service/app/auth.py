@@ -9,12 +9,12 @@ def create_broker():
     # 인증 정보를 파일에서 읽어옵니다.
     with open(key_path) as f:
         lines = f.readlines()
-        key = lines[0].strip().split('=')[1]
-        secret = lines[1].strip().split('=')[1]
-        acc_no = lines[2].strip().split('=')[1]
+        key = lines[0].strip()      # 첫 번째 줄: API Key
+        secret = lines[1].strip()   # 두 번째 줄: Secret Key
+        acc_no = lines[2].strip()   # 세 번째 줄: Account Number
 
     return mojito.KoreaInvestment(
-        app_key=key,  # api_key에서 app_key로 변경
-        app_secret=secret,  # api_secret에서 app_secret으로 변경
+        app_key=key,
+        app_secret=secret,
         acc_no=acc_no
     )
