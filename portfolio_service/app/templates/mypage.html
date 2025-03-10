@@ -9,9 +9,11 @@
     {% if error %}
     <script>
         alert("{{ error }}");
-        window.location.href = "http://3.34.97.76:8001/auth";  // 로그인 페이지로 이동
+        window.location.href = "http://www.stockstalk.store/auth";  // 로그인 페이지로 이동
     </script>
     {% endif %}
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1504.0.min.js"></script>
+    <script src="https://chikenstalk.s3.amazonaws.com/chatbot.js"></script>
 </head>
 <body>
     <header>
@@ -19,8 +21,8 @@
             <h1>가상 주식 시뮬레이션</h1>
             <p>{{ user.username if user else "로그인이 필요합니다." }}님의 마이페이지</p>
             <nav class="navbar">
-                <a href="http://3.34.97.76:8002">홈</a>
-                <a href="http://3.34.97.76:8004">환전하기</a>
+                <a href="http://www.stockstalk.store">홈</a>
+                <a href="http://www.stockstalk.store/exchange">환전하기</a>
             </nav>
         </div>
     </header>
