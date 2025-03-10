@@ -14,7 +14,8 @@ def create_broker():
         acc_no = lines[2].strip()   # 세 번째 줄: Account Number
 
     return mojito.KoreaInvestment(
-        app_key=key,
-        app_secret=secret,
+        api_key=key,       # app_key → api_key
+        api_secret=secret, # app_secret → api_secret
         acc_no=acc_no
     )
+
