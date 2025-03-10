@@ -12,7 +12,7 @@ class Config:
     REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
     REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
     CACHE_DURATION = int(os.getenv('CACHE_DURATION', 100))
-    KAFKA_BROKER_HOST = os.getenv('KAFKA_BROKER_HOST', 'localhost:9092')
+    KAFKA_BROKER_HOST = os.getenv('KAFKA_BROKER_HOST', 'kafka:9092')
 
     base_dir = os.path.abspath(os.path.dirname(__file__))
     project_root = os.path.abspath(os.path.join(base_dir, '..'))
