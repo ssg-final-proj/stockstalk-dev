@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Redis 클라이언트 설정
-redis_client_user = redis.StrictRedis(host="redis", port=6379, db=1, decode_responses=True)
+redis_client_user = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=int(os.getenv('REDIS_PORT')), db=1, decode_responses=True)
 
 # 블루프린트 생성
 exchange = Blueprint("exchange", __name__)
