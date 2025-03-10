@@ -1,6 +1,7 @@
 import os
 import mojito
 import redis
+import time
 from datetime import timedelta
 
 def create_broker():
@@ -11,6 +12,7 @@ def create_broker():
     if not key_path:
         raise ValueError("KOREA_INVESTMENT_KEY_PATH 환경 변수가 설정되지 않았습니다.")
 
+    # Redis 클라이언트 초기화
     redis_client = redis.StrictRedis(
         host=redis_host,
         port=redis_port,
@@ -18,6 +20,7 @@ def create_broker():
         decode_responses=True
     )
 
+    # 키 파일 읽기
     with open(key_path) as f:
         lines = f.readlines()
         key = lines[0].strip()
@@ -25,42 +28,48 @@ def create_broker():
         acc_no = lines[2].strip()
 
     try:
-        token = redis_client.get("koreainvestment:access_token")
-        
-        if token:
-            broker = mojito.KoreaInvestment(
-                api_key=key,
-                api_secret=secret,
-                acc_no=acc_no
-            )
-            broker.access_token = token
-            print("Redis에서 캐시된 토큰 사용")
-            return broker
+        # Redis에서 토큰 확인 (최대 10초 동안 반복적으로 확인)
+        for _ in range(10):  # 최대 10번 (약 10초 대기)
+            token = redis_client.get("koreainvestment:access_token")
+            if token:
+                broker = mojito.KoreaInvestment(
+                    api_key=key,
+                    api_secret=secret,
+                    acc_no=acc_no
+                )
+                broker.access_token = token  # Redis에서 가져온 토큰 사용
+                print("✅ Redis에서 캐시된 토큰 사용")
+                return broker
+            print("⏳ Redis에 토큰이 아직 없습니다. 1초 대기...")
+            time.sleep(1)
 
+        # 반복 후에도 토큰이 없으면 새로 발급
+        print("⚠️ Redis에 토큰이 없어 새로 발급합니다.")
         broker = mojito.KoreaInvestment(
             api_key=key,
             api_secret=secret,
             acc_no=acc_no
         )
-        
+
         if not broker.access_token:
             raise ValueError("토큰 발급 실패")
 
+        # 새로 발급한 토큰 Redis에 저장 (23시간 유효)
         redis_client.setex(
             "koreainvestment:access_token",
             timedelta(hours=23),
             broker.access_token
         )
-        print("새 토큰 발급 및 Redis 저장 완료")
+        print("✅ 새 토큰 발급 및 Redis 저장 완료")
         return broker
 
     except redis.exceptions.ConnectionError as e:
-        print(f"Redis 연결 실패: {e}, 새 토큰 발급")
+        print(f"⚠️ Redis 연결 실패: {e}, 새 토큰 발급")
         return mojito.KoreaInvestment(
             api_key=key,
             api_secret=secret,
             acc_no=acc_no
         )
     except Exception as e:
-        print(f"예외 발생: {e}")
+        print(f"❌ 예외 발생: {e}")
         raise
