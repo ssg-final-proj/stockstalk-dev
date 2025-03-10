@@ -1,5 +1,5 @@
 import os
-from custom_korea_investment import CustomKoreaInvestment as KoreaInvestment
+from .custom_korea_investment import CustomKoreaInvestment as KoreaInvestment
 
 def create_broker():
     key_path = os.getenv("KOREA_INVESTMENT_KEY_PATH")
