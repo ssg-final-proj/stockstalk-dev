@@ -1,6 +1,6 @@
 # auth.py
 import os
-from custom_korea_investment import CustomKoreaInvestment
+from .custom_korea_investment import CustomKoreaInvestment
 
 def create_broker():
     key_path = os.getenv("KOREA_INVESTMENT_KEY_PATH")
