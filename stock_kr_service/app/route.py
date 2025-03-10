@@ -6,7 +6,7 @@ import time
 import pandas as pd
 import zipfile
 import fcntl  # Unix용 모듈-윈도우에서 실행시 주석처리 필요
-from .auth import create_broker
+from auth import create_broker
 
 
 # 증권 API 브로커 생성
