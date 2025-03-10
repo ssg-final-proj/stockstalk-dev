@@ -1,5 +1,5 @@
 import os
-from .custom_korea_investment import CustomKoreaInvestment as KoreaInvestment
+from .custom_korea_investment import CustomKoreaInvestment  # ✅ 상대 경로로 임포트
 
 def create_broker():
     key_path = os.getenv("KOREA_INVESTMENT_KEY_PATH")
@@ -13,7 +13,7 @@ def create_broker():
         secret = lines[1].strip()   # 두 번째 줄: Secret Key
         acc_no = lines[2].strip()   # 세 번째 줄: Account Number
 
-    return KoreaInvestment(  # ✅ 커스텀 클래스 사용
+    return CustomKoreaInvestment(  # ✅ 커스텀 클래스를 사용
         api_key=key,
         api_secret=secret,
         acc_no=acc_no
