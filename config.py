@@ -34,10 +34,10 @@ class Config:
     }
 
     # ✅ BASE_URL 추가
-    BASE_URL = os.getenv('URL', 'http://localhost:5000')
-    AUTH_SERVICE_URL = os.getenv('AUTH_SERVICE_URL', 'http://localhost:5000/auth')
-    EXCHANGE_SERVICE_URL = os.getenv('EXCHANGE_SERVICE_URL', 'http://localhost:5000/exchange')
-    PORTFOLIO_SERVICE_URL = os.getenv('PORTFOLIO_SERVICE_URL', 'http://localhost:5000/portfolio')
+    BASE_URL = os.getenv('URL', 'http://stock-kr-service:8002')
+    AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8001")
+    EXCHANGE_SERVICE_URL = os.getenv("EXCHANGE_SERVICE_URL", "http://exchange-service:8004")
+    PORTFOLIO_SERVICE_URL = os.getenv("PORTFOLIO_SERVICE_URL", "http://portfolio-service:8003")
     
     # ✅ KAKAO REST API KEY
     REST_API_KEY = os.getenv('KAKAO_SECRET_KEY')

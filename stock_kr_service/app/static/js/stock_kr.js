@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 navbarRight.innerHTML = `
                     <a class="button" href="${EXCHANGE_SERVICE_URL}">환전하기</a>
                     <a class="button" href="${PORTFOLIO_SERVICE_URL}">마이페이지</a>
-                    <a class="button" href="${AUTH_SERVICE_URL}/login">로그인</a>
+                    <a class="button" href="${AUTH_SERVICE_URL}">로그인</a>
                 `;
             }
         } catch (error) {
