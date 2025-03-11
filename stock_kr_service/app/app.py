@@ -39,7 +39,7 @@ producer = KafkaProducer(
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 
-CACHE_DURATION = 10
+CACHE_DURATION = 60
 
 def sync(f):
     @wraps(f)
