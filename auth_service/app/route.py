@@ -133,12 +133,12 @@ def kakaoLoginLogicRedirect():
 
         response.set_cookie(
             "kakao_id",
-            str(user_to_store.kakao_id),
+            value=str(user_to_store.kakao_id),
             max_age=86400,
-            samesite="None",  # ✅ 크로스-사이트 쿠키 허용
-            secure=True,  # ✅ HTTPS에서만 쿠키 전송
-            path="/",  # ✅ 모든 경로에서 쿠키 사용 가능
-            domain=".stockstalk.store" # ✅ 모든 서브도메인에서 쿠키 사용 가능
+            domain=".stockstalk.store",  # 모든 서브도메인에서 접근 가능
+            secure=True,               # HTTPS 전용
+            samesite="None",           # 크로스 사이트 허용
+            httponly=False             # JavaScript에서 접근 가능
         )
         
         if user_data["username"] == "No username":

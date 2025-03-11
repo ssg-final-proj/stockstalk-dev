@@ -31,7 +31,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
-redis_lock_timeout = 3
+redis_lock_timeout = 5
 MAX_RETRY = 3  # 최대 재시도 횟수
 
 # Load environment variables

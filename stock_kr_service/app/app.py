@@ -210,18 +210,18 @@ def create_app():
     
     @app.route('/api/check-login', methods=['GET'])
     def check_login():
-        kakao_id = request.cookies.get('kakao_id')  # 쿠키에서 kakao_id 값 확인
-        app.logger.info(f"✅ 현재 세션 kakao_id: {kakao_id}")  # 로그에 세션 값 기록
-
+        kakao_id = request.cookies.get('kakao_id')
         try:
             if kakao_id:
                 user_data = redis_client_user.get(f'session:{kakao_id}')
                 if user_data:
-                    return jsonify({"logged_in": True, "kakao_id": kakao_id})
+                    return jsonify({
+                        "loggedIn": True,  # ✅ camelCase로 통일
+                        "userData": json.loads(user_data)
+                    })
+            return jsonify({"loggedIn": False})
         except Exception as e:
-            app.logger.error(f"Redis에서 사용자 데이터를 가져오는 중 오류 발생: {e}")
-
-        return jsonify({"logged_in": False})
+            return jsonify({"error": str(e)}), 500
 
     @app.route('/login')
     def login():
