@@ -44,7 +44,8 @@ def kakaologin():
 
 @auth.route("/kakaoLoginLogic", methods=["GET"])
 def kakaoLoginLogic():
-    redirect_uri = f"{AUTH_SERVICE_URL}/kakaoLoginLogicRedirect"
+    # redirect_uri = f"{AUTH_SERVICE_URL}/kakaoLoginLogicRedirect"
+    redirect_uri = "http://www.stockstalk.store/auth/kakaoLoginLogicRedirect"
     url = f"https://kauth.kakao.com/oauth/authorize?client_id={current_config.SECRET_KEY}&redirect_uri={redirect_uri}&response_type=code"
     return redirect(url)
 
