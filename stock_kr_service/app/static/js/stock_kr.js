@@ -3,10 +3,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     const stockTable = document.getElementById('stock-table');
 
     // Config 값을 JavaScript 변수로 전달
-    const AUTH_SERVICE_URL = "{{ config.AUTH_SERVICE_URL }}";
-    const EXCHANGE_SERVICE_URL = "{{ config.EXCHANGE_SERVICE_URL }}";
-    const PORTFOLIO_SERVICE_URL = "{{ config.PORTFOLIO_SERVICE_URL }}";
-
+    const { 
+        AUTH_SERVICE_URL, 
+        EXCHANGE_SERVICE_URL, 
+        PORTFOLIO_SERVICE_URL 
+    } = window.CONFIG;
+    
     // 로그인 상태 확인 함수
     async function checkLoginStatus() {
         try {
