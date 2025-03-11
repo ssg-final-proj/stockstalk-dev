@@ -124,27 +124,34 @@ def kakaoLoginLogicRedirect():
         "seed_usd": user_to_store.seed_usd,
         "last_login": user_to_store.last_login.isoformat(),
     }
-    redis_client_user.set(f"session:{user_to_store.kakao_id}", json.dumps(user_data), ex=86400)
-
-    # 쿠키 설정
-    response = make_response(redirect(STOCK_SERVICE_URL))
-
-    response.set_cookie(
-        "kakao_id",
-        str(user_to_store.kakao_id),
-        max_age=86400,
-        samesite="Lax",
-        secure=False,
-        path="/"  # ✅ 쿠키 경로를 전체 도메인으로 설정
-    )
     
-    if user_data["username"] == "No username":
-        response = redirect(url_for('auth.set_username'))  # 닉네임 설정 페이지로 리다이렉트
-    else:
-        response = redirect(STOCK_SERVICE_URL)  # stock-kr-service로 리다이렉트
+    try:
+        redis_client_user.set(f"session:{user_to_store.kakao_id}", json.dumps(user_data), ex=86400)
 
-    logger.info(f"쿠키 설정 완료: {user_to_store.kakao_id}")
-    return response
+        # 쿠키 설정
+        response = make_response(redirect(STOCK_SERVICE_URL))
+
+        response.set_cookie(
+            "kakao_id",
+            str(user_to_store.kakao_id),
+            max_age=86400,
+            samesite="None",  # ✅ 크로스-사이트 쿠키 허용
+            secure=True,  # ✅ HTTPS에서만 쿠키 전송
+            path="/",  # ✅ 모든 경로에서 쿠키 사용 가능
+            domain=".stockstalk.store" # ✅ 모든 서브도메인에서 쿠키 사용 가능
+        )
+        
+        if user_data["username"] == "No username":
+            response = redirect(url_for('auth.set_username'))  # 닉네임 설정 페이지로 리다이렉트
+        else:
+            response = redirect(STOCK_SERVICE_URL)  # stock-kr-service로 리다이렉트
+
+        logger.info(f"쿠키 설정 완료: {user_to_store.kakao_id}")
+        return response
+
+    except Exception as e:
+        logger.error(f"Redis 또는 쿠키 설정 오류: {e}")
+        return "Redis 또는 쿠키 설정 오류 발생", 500
 
 @auth.route("/set_username", methods=["GET", "POST"])
 def set_username():
@@ -199,7 +206,7 @@ def logout():
         redis_client_user.delete(f"session:{kakao_id}")
 
     response = make_response(redirect(STOCK_SERVICE_URL))
-    response.delete_cookie("kakao_id", path='/')  # 쿠키 삭제 시 path 지정
+    response.delete_cookie("kakao_id", path='/', domain=".stockstalk.store")  # 쿠키 삭제 시 path 지정
     return response
 
 @auth.route("/check-login", methods=["GET"])
@@ -208,7 +215,7 @@ def check_login():
 
     if kakao_id and redis_client_user.exists(f"session:{kakao_id}"):
         user_data = json.loads(redis_client_user.get(f"session:{kakao_id}"))
-        return jsonify({"loggedIn": True, "kakao_id": user_data["kakao_id"]})
+        return jsonify({"loggedIn": True, "kakao_id": user_data["kakao_id"], "user_data": user_data})
 
     return jsonify({"loggedIn": False})
 
@@ -238,7 +245,6 @@ def update_user():
             user_data['seed_krw'] = seed_krw
             user_data['seed_usd'] = seed_usd
             redis_client_user.set(f'session:{kakao_id}', json.dumps(user_data), ex=86400)
-
-        return jsonify({"message": "User updated successfully"}), 200
+            return jsonify({"message": "User updated successfully"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

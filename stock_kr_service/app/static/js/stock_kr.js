@@ -17,25 +17,27 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 로그인 상태 확인 함수
     async function checkLoginStatus() {
         try {
-            const response = await fetch('/api/check-login'); // 로그인 상태 확인
+            const response = await fetch('/api/check-login');
             const data = await response.json();
             const navbarRight = document.querySelector('nav.navbar-right');
-
-            if (data.logged_in) {
+    
+            if (data.loggedIn) {
+                // 로그인 상태일 때 사용자 이름 표시 또는 로그아웃 버튼 표시
                 navbarRight.innerHTML = `
                     <a class="button" href="${EXCHANGE_SERVICE_URL}">환전하기</a>
                     <a class="button" href="${PORTFOLIO_SERVICE_URL}">마이페이지</a>
+                    <span>${data.user_data.username}</span>
                     <a class="button" id="logout-button" href="#">로그아웃</a>
                 `;
-
-                // 로그아웃 버튼 이벤트 추가
+    
                 document.getElementById('logout-button').addEventListener('click', async function (event) {
                     event.preventDefault();
                     await fetch('/logout', { method: 'GET', mode: 'no-cors' });
                     alert('로그아웃되었습니다!');
-                    window.location.reload(); // UI 업데이트를 위해 페이지 새로고침
+                    window.location.reload(); // 로그아웃 후 페이지 새로고침
                 });
             } else {
+                // 로그아웃 상태일 때 로그인 버튼 표시
                 navbarRight.innerHTML = `
                     <a class="button" href="${EXCHANGE_SERVICE_URL}">환전하기</a>
                     <a class="button" href="${PORTFOLIO_SERVICE_URL}">마이페이지</a>
@@ -45,7 +47,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         } catch (error) {
             console.error('로그인 상태 확인 실패:', error);
         }
-        
     }
 
     // 주식 데이터 불러오기 (초기)
