@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const kakaoId = getCookie('kakao_id');
     if (!kakaoId) {
         console.error('사용자 ID가 없습니다.');
-        window.location.href = '/login';
+        window.location.href = AUTH_SERVICE_URL + '/login';  // Config에서 가져온 URL 사용
         return;
     }
 
@@ -213,7 +213,7 @@ async function submitOrder(orderType) {
     const kakaoId = getCookie('kakao_id');
     if (!kakaoId) {
         showError('로그인이 필요합니다.');
-        window.location.href = '/login';
+        window.location.href = AUTH_SERVICE_URL + '/login';  // Config에서 가져온 URL 사용
         return;
     }
 
@@ -268,8 +268,9 @@ async function fetchOrderHistory(stockCode) {
         console.error('사용자 ID가 없습니다.');
         return;
     }
+
     try {
-        const response = await fetch(`http://3.34.97.76:8003/api/order-history?code=${stockCode}&kakao_id=${kakaoId}`);
+        const response = await fetch(`${PORTFOLIO_SERVICE_URL}/api/order-history?code=${stockCode}&kakao_id=${kakaoId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -314,7 +315,6 @@ function updateOrderHistoryUI(orders) {
         });
     }
 }
-
 
 const socket = io('/stock');
 

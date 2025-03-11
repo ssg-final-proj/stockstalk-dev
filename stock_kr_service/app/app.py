@@ -13,7 +13,6 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from functools import wraps
 import requests
-from .auth import *
 import json
 from config import current_config, ENV
 import logging
@@ -170,7 +169,6 @@ def create_app():
         # 앱 시작 시 백그라운드 태스크 시작
         background_tasks.start(redis_client_stock, fetch_all_stock_data, app.config['CACHE_DURATION'])
 
-
     @app.route('/')
     def home():
         kakao_id = request.cookies.get('kakao_id')
@@ -199,16 +197,16 @@ def create_app():
     @app.route('/mypage')
     def mypage():
         if (kakao_id := request.cookies.get('kakao_id')):
-            return redirect(f'http://www.stockstalk.store/portfolio')  # 로그인된 사용자는 마이페이지로 리디렉션
+            return redirect(f'{current_config.PORTFOLIO_SERVICE_URL}')  # 로그인된 사용자는 마이페이지로 리디렉션
         else:
-            return redirect(f'http://www.stockstalk.store/auth')  # 로그인 안 된 사용자는 로그인 페이지로 리디렉션
+            return redirect(f'{current_config.AUTH_SERVICE_URL}')  # 로그인 안 된 사용자는 로그인 페이지로 리디렉션
         
     @app.route('/exchange')
     def exchange():
         if (kakao_id := request.cookies.get('kakao_id')):
-            return redirect(f'http://www.stockstalk.store/exchange')
+            return redirect(f'{current_config.EXCHANGE_SERVICE_URL}')
         else:
-            return redirect(f'http://www.stockstalk.store/auth')
+            return redirect(f'{current_config.AUTH_SERVICE_URL}')
     
     @app.route('/api/check-login', methods=['GET'])
     def check_login():
@@ -227,7 +225,7 @@ def create_app():
 
     @app.route('/login')
     def login():
-        return redirect(f'http://www.stockstalk.store/auth')
+        return redirect(f'{current_config.AUTH_SERVICE_URL}')
 
     @app.route('/api/realtime-stock-data', methods=['GET'])
     @sync
@@ -271,7 +269,7 @@ def create_app():
         kakao_id = request.cookies.get('kakao_id')
 
         if not kakao_id:
-            return redirect(url_for('auth.login'))
+            return redirect(url_for('login'))  # Config의 login 라우트 사용
 
         if request.method == 'POST':
             data = request.json
@@ -305,7 +303,7 @@ def create_app():
                         return jsonify({"error": "잔금이 부족합니다"}), 400
                 elif order_type == 'SELL':
                     # 포트폴리오 서비스에서 보유 주식 수량 확인 (API 호출 필요)
-                    portfolio_response = requests.get(f"http://www.stockstalk.store/portfolio/api/portfolio/{kakao_id}/{stock_symbol}")
+                    portfolio_response = requests.get(f"{current_config.PORTFOLIO_SERVICE_URL}/api/portfolio/{kakao_id}/{stock_symbol}")
                     portfolio_response.raise_for_status()  # HTTP 에러 발생 시 예외 발생
 
                     if portfolio_response.status_code == 200:

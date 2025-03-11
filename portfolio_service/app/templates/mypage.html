@@ -9,11 +9,9 @@
     {% if error %}
     <script>
         alert("{{ error }}");
-        window.location.href = "http://www.stockstalk.store/auth";  // 로그인 페이지로 이동
+        window.location.href = "{{ service_urls.auth }}";
     </script>
     {% endif %}
-    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1504.0.min.js"></script>
-    <script src="https://chikenstalk.s3.amazonaws.com/chatbot.js"></script>
 </head>
 <body>
     <header>
@@ -21,8 +19,8 @@
             <h1>가상 주식 시뮬레이션</h1>
             <p>{{ user.username if user else "로그인이 필요합니다." }}님의 마이페이지</p>
             <nav class="navbar">
-                <a href="http://www.stockstalk.store">홈</a>
-                <a href="http://www.stockstalk.store/exchange">환전하기</a>
+                <a href="{{ service_urls.home }}">홈</a>
+                <a href="{{ service_urls.exchange }}">환전하기</a>
             </nav>
         </div>
     </header>
@@ -126,14 +124,7 @@
                                         취소됨
                                     {% endif %}
                                 </td>
-                                <td>
-                                    <div class="order-date-and-cancel">
-                                        {{ order.created_at }}
-                                        {% if order.status == "PENDING" %}
-                                            <button onclick="cancelOrder({{ order.order_id }})">취소</button>
-                                        {% endif %}
-                                    </div>
-                                </td>
+                                <td>{{ order.created_at }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -168,5 +159,7 @@
             });
         }
     </script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1504.0.min.js"></script>
+    <script src="https://chikenstalk.s3.amazonaws.com/chatbot.js"></script>
 </body>
 </html>

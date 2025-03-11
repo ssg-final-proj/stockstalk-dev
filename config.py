@@ -33,6 +33,12 @@ class Config:
         'stock' : SQLALCHEMY_DATABASE_URI + '/' + PORTFOLIO_SCHEMA,
     }
 
+    # ✅ BASE_URL 추가
+    BASE_URL = os.getenv('URL', 'http://localhost:5000')
+    AUTH_SERVICE_URL = os.getenv('AUTH_SERVICE_URL', 'http://localhost:5000/auth')
+    EXCHANGE_SERVICE_URL = os.getenv('EXCHANGE_SERVICE_URL', 'http://localhost:5000/exchange')
+    PORTFOLIO_SERVICE_URL = os.getenv('PORTFOLIO_SERVICE_URL', 'http://localhost:5000/portfolio')
+    
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_ECHO = True

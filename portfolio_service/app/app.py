@@ -277,7 +277,7 @@ def handle_order_event(event):
         session.close()
 
 def update_user_in_auth_service(kakao_id, seed_krw):
-    update_url = "http://3.34.97.76:8001/auth/api/update_user"
+    update_url = f"{current_config.AUTH_SERVICE_URL}/api/update_user"
     for retry in range(MAX_RETRY):
         try:
             logger.info(f"Attempt {retry + 1} to update user in Auth service")

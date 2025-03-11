@@ -1,4 +1,3 @@
-# route.py (exchange_service)
 import os
 import json
 import logging
@@ -8,61 +7,76 @@ import requests
 from flask import Blueprint, request, jsonify, render_template
 from db import db, Exchange
 from datetime import datetime, timedelta
+from config import current_config
 
-# 캐시된 환율 데이터를 저장할 변수
-cached_exchange_rate = None
-last_fetch_time = None
-
-# 로그 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Redis 클라이언트 설정
-redis_client_user = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=int(os.getenv('REDIS_PORT')), db=1, decode_responses=True)
-
-# 블루프린트 생성
 exchange = Blueprint("exchange", __name__)
 
+redis_client_user = redis.StrictRedis(
+    host=current_config.REDIS_HOST,
+    port=current_config.REDIS_PORT,
+    db=1,
+    decode_responses=True
+)
+
+redis_client_exchange = redis.StrictRedis(
+    host=current_config.REDIS_HOST,
+    port=current_config.REDIS_PORT,
+    db=5,
+    decode_responses=True
+)
+
+STOCK_SERVICE_URL = current_config.BASE_URL
+AUTH_SERVICE_URL = current_config.AUTH_SERVICE_URL
+PORTFOLIO_SERVICE_URL = current_config.PORTFOLIO_SERVICE_URL
+
 def get_user_from_redis(kakao_id):
-    """Redis에서 사용자 정보 가져오기"""
     user_data = redis_client_user.get(f'session:{kakao_id}')
-    if user_data:
-        return json.loads(user_data)
-    return None
+    return json.loads(user_data) if user_data else None
 
 def get_exchange_rate():
-    """실시간 환율 정보를 가져오고 캐싱"""
-    global cached_exchange_rate, last_fetch_time
-    now = datetime.now()
-    next_full_hour = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
-
-    if cached_exchange_rate and last_fetch_time and last_fetch_time >= next_full_hour - timedelta(hours=1):
-        logger.info(f"✅ 캐시된 환율 사용: {cached_exchange_rate}")
-        return cached_exchange_rate
-    
     try:
+        cached_rate = redis_client_exchange.get('cached_exchange_rate')
+        if cached_rate:
+            logger.info(f"✅ Redis 캐시된 환율 사용: {cached_rate}")
+            return float(cached_rate)
+
         ticker = yf.Ticker("USDKRW=X")
         exchange_rate = ticker.history(period="1d")['Close'].iloc[-1]
-        cached_exchange_rate = round(exchange_rate, 2)
-        last_fetch_time = now
-        logger.info(f"📡 실시간 환율 조회 성공: {cached_exchange_rate}")
-        return cached_exchange_rate
+        rounded_rate = round(exchange_rate, 2)
+
+        redis_client_exchange.setex('cached_exchange_rate', timedelta(hours=1), rounded_rate)
+        logger.info(f"📡 실시간 환율 조회 성공: {rounded_rate}")
+        return rounded_rate
     except Exception as e:
-        logger.error(f"❌ 환율 데이터를 가져오는 중 오류 발생: {e}")
+        logger.error(f"❌ 환율 데이터 오류: {e}")
         return None
 
 @exchange.route('/', methods=['GET', 'POST'])
 def handle_exchange():
-    """환전 처리 및 화면 렌더링"""
     kakao_id = request.cookies.get('kakao_id')
-    logger.info(f"✅ exchange 쿠키에서 kakao_id 확인: {kakao_id}")
+    logger.info(f"✅ Exchange 쿠키 확인: {kakao_id}")
 
     if not kakao_id:
-        return render_template("exchange.html", error="로그인이 필요합니다.")
+        return render_template("exchange.html", 
+                             error="로그인이 필요합니다.",
+                             service_urls={
+                                 'auth': AUTH_SERVICE_URL,
+                                 'portfolio': PORTFOLIO_SERVICE_URL,
+                                 'home': STOCK_SERVICE_URL
+                             })
 
     user_data = get_user_from_redis(kakao_id)
     if not user_data:
-        return render_template("exchange.html", error="로그인이 필요합니다.")
+        return render_template("exchange.html", 
+                             error="로그인이 필요합니다.",
+                             service_urls={
+                                 'auth': AUTH_SERVICE_URL,
+                                 'portfolio': PORTFOLIO_SERVICE_URL,
+                                 'home': STOCK_SERVICE_URL
+                             })
 
     exchange_rate = get_exchange_rate() or 1450.00
     message = ""
@@ -71,17 +85,12 @@ def handle_exchange():
         try:
             currency_pair = request.form.get('currency_pair')
             amount = float(request.form.get('amount', 0))
-            kakao_id = user_data['kakao_id']
-
-            # 트랜잭션 시작
-            db.session.begin_nested()
-
+            
             if currency_pair == 'KRW_to_USD' and user_data['seed_krw'] >= amount:
                 exchanged_amount = round(amount / exchange_rate, 2)
                 new_krw = user_data['seed_krw'] - amount
                 new_usd = user_data['seed_usd'] + exchanged_amount
                 
-                # DB 업데이트
                 db.session.add(Exchange(
                     kakao_id=kakao_id,
                     from_currency='KRW',
@@ -91,7 +100,6 @@ def handle_exchange():
                     total_value=exchanged_amount
                 ))
 
-                # Redis 업데이트
                 user_data['seed_krw'] = new_krw
                 user_data['seed_usd'] = new_usd
                 redis_client_user.set(f'session:{kakao_id}', json.dumps(user_data), ex=86400)
@@ -103,7 +111,6 @@ def handle_exchange():
                 new_usd = user_data['seed_usd'] - amount
                 new_krw = user_data['seed_krw'] + exchanged_amount
 
-                # DB 업데이트
                 db.session.add(Exchange(
                     kakao_id=kakao_id,
                     from_currency='USD',
@@ -113,7 +120,6 @@ def handle_exchange():
                     total_value=exchanged_amount
                 ))
 
-                # Redis 업데이트
                 user_data['seed_krw'] = new_krw
                 user_data['seed_usd'] = new_usd
                 redis_client_user.set(f'session:{kakao_id}', json.dumps(user_data), ex=86400)
@@ -121,57 +127,54 @@ def handle_exchange():
                 message = f"{amount} USD를 {exchanged_amount} KRW로 환전했습니다!"
             else:
                 message = "잔액이 부족하거나 올바른 통화를 선택해주세요."
-                return render_template('exchange.html', exchange_rate=exchange_rate, message=message)
+                return render_template('exchange.html', 
+                                     exchange_rate=exchange_rate, 
+                                     message=message,
+                                     service_urls={
+                                         'auth': AUTH_SERVICE_URL,
+                                         'portfolio': PORTFOLIO_SERVICE_URL,
+                                         'home': STOCK_SERVICE_URL
+                                     })
 
-            # auth_service에 업데이트 요청
-            try:
-                update_url = "http://auth_service:8001/auth/api/update_user"
-                response = requests.post(update_url, json={
-                    "kakao_id": kakao_id,
-                    "seed_krw": user_data['seed_krw'],
-                    "seed_usd": user_data['seed_usd']
-                })
-                
-                if response.status_code != 200:
-                    logger.error(f"❌ Auth service 업데이트 실패: {response.text}")
-                    raise Exception("Auth service update failed")
-                
-                logger.info("✅ Auth service 업데이트 성공")
-                
-                # 모든 작업이 성공하면 트랜잭션 커밋
-                db.session.commit()
-            except Exception as e:
-                # 실패시 롤백
-                db.session.rollback()
-                logger.error(f"❌ 환전 처리 중 오류 발생: {str(e)}")
-                message = "환전 처리 중 오류가 발생했습니다."
-                
+            update_url = f"{AUTH_SERVICE_URL}/api/update_user"
+            response = requests.post(update_url, json={
+                "kakao_id": kakao_id,
+                "seed_krw": user_data['seed_krw'],
+                "seed_usd": user_data['seed_usd']
+            })
+            
+            if response.status_code != 200:
+                logger.error(f"❌ Auth service 업데이트 실패: {response.text}")
+                raise Exception("Auth service update failed")
+            
+            logger.info("✅ Auth service 업데이트 성공")
+            
+            db.session.commit()
         except Exception as e:
             db.session.rollback()
             logger.error(f"❌ 환전 처리 중 오류 발생: {str(e)}")
             message = "환전 처리 중 오류가 발생했습니다."
 
-    return render_template('exchange.html', user=user_data, exchange_rate=exchange_rate, message=message)
-
+    return render_template('exchange.html',
+                         user=user_data,
+                         exchange_rate=exchange_rate,
+                         message=message,
+                         service_urls={
+                             'auth': AUTH_SERVICE_URL,
+                             'portfolio': PORTFOLIO_SERVICE_URL,
+                             'home': STOCK_SERVICE_URL
+                         })
 
 @exchange.route('/get_balance', methods=['POST'])
 def get_balance():
-    """사용자의 KRW/USD 잔액 조회 API"""
     kakao_id = request.cookies.get('kakao_id')
-    logger.info(f"✅ mypage 쿠키에서 kakao_id 확인: {kakao_id}")
-
     if not kakao_id:
-        return render_template("exchange.html", error="로그인이 필요합니다.")
+        return jsonify({"error": "로그인 필요"}), 401
 
     user_data = get_user_from_redis(kakao_id)
     if not user_data:
-        return render_template("exchange.html", error="로그인이 필요합니다.")
-
-    # User 정보를 Redis에서 가져와 변수에 할당
-    seed_krw = user_data['seed_krw']
-    seed_usd = user_data['seed_usd']
+        return jsonify({"error": "사용자 정보 없음"}), 404
 
     currency_pair = request.json.get('currency_pair')
-    balance = seed_krw if currency_pair == 'KRW_to_USD' else seed_usd if currency_pair == 'USD_to_KRW' else 0
-
+    balance = user_data['seed_krw'] if currency_pair == 'KRW_to_USD' else user_data['seed_usd']
     return jsonify({'balance': balance})

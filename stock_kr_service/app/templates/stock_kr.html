@@ -6,9 +6,13 @@
     <title>가상 주식 시뮬레이션</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Config 값을 JavaScript 변수로 전달
+        var PORTFOLIO_SERVICE_URL = "{{ config.PORTFOLIO_SERVICE_URL }}";
+        var AUTH_SERVICE_URL = "{{ config.AUTH_SERVICE_URL }}";
+        var EXCHANGE_SERVICE_URL = "{{ config.EXCHANGE_SERVICE_URL }}";
+    </script>
     <script src="{{ url_for('static', filename='js/stock_kr.js') }}"></script>
-    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1504.0.min.js"></script>
-    <script src="https://chikenstalk.s3.amazonaws.com/chatbot.js"></script>
 </head>
 <body>
     <header>
@@ -58,5 +62,7 @@
             </div>
         </div>
     </main>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1504.0.min.js"></script>
+    <script src="https://chikenstalk.s3.amazonaws.com/chatbot.js"></script>
 </body>
 </html>

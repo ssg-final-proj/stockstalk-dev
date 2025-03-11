@@ -9,7 +9,7 @@
     {% if error %}
     <script>
         alert("{{ error }}");
-        window.location.href = "http://3.34.97.76:8001/auth";  // 로그인 페이지로 이동
+        window.location.href = "{{ service_urls.auth }}";
     </script>
     {% endif %}
 </head>
@@ -34,8 +34,8 @@
             </span> KRW
         </p>
         <nav class="navbar">
-            <a href="http://3.34.97.76:8002">홈</a>
-            <a href="http://3.34.97.76:8003">마이페이지</a>
+            <a href="{{ service_urls.home }}">홈</a>
+            <a href="{{ service_urls.portfolio }}">마이페이지</a>
         </nav>
     </header>
     <main>
@@ -45,7 +45,7 @@
             <div class="currency-pair" data-pair="USD_to_KRW">외화 (USD) → 원화</div>
         </div>
         <p id="message" class="alert-message">{{ message if message else '' }}</p>
-        <form action="/" method="post">
+        <form action="{{ url_for('exchange.handle_exchange') }}" method="post">
             <input type="hidden" id="currency_pair" name="currency_pair" value="KRW_to_USD">
             <label for="amount">금액:</label>
             <input type="number" id="amount" name="amount" step="0.01" required>
@@ -53,6 +53,8 @@
             <button type="submit">환전</button>
         </form>
     </main>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1504.0.min.js"></script>
+    <script src="https://chikenstalk.s3.amazonaws.com/chatbot.js"></script>
     <script src="/static/js/exchange.js"></script>
 </body>
 </html>

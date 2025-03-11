@@ -2,6 +2,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     const loader = document.getElementById('loader');
     const stockTable = document.getElementById('stock-table');
 
+    // Config 값을 JavaScript 변수로 전달
+    const AUTH_SERVICE_URL = "{{ config.AUTH_SERVICE_URL }}";
+    const EXCHANGE_SERVICE_URL = "{{ config.EXCHANGE_SERVICE_URL }}";
+    const PORTFOLIO_SERVICE_URL = "{{ config.PORTFOLIO_SERVICE_URL }}";
+
     // 로그인 상태 확인 함수
     async function checkLoginStatus() {
         try {
@@ -11,8 +16,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             if (data.logged_in) {
                 navbarRight.innerHTML = `
-                    <a class="button" href="/exchange">환전하기</a>
-                    <a class="button" href="/mypage">마이페이지</a>
+                    <a class="button" href="${EXCHANGE_SERVICE_URL}">환전하기</a>
+                    <a class="button" href="${PORTFOLIO_SERVICE_URL}">마이페이지</a>
                     <a class="button" id="logout-button" href="#">로그아웃</a>
                 `;
 
@@ -25,16 +30,15 @@ document.addEventListener('DOMContentLoaded', async function () {
                 });
             } else {
                 navbarRight.innerHTML = `
-                    <a class="button" href="/exchange">환전하기</a>
-                    <a class="button" href="/mypage">마이페이지</a>
-                    <a class="button" href="/login">로그인</a>
+                    <a class="button" href="${EXCHANGE_SERVICE_URL}">환전하기</a>
+                    <a class="button" href="${PORTFOLIO_SERVICE_URL}">마이페이지</a>
+                    <a class="button" href="${AUTH_SERVICE_URL}/login">로그인</a>
                 `;
             }
         } catch (error) {
             console.error('로그인 상태 확인 실패:', error);
         }
     }
-
 
     // 주식 데이터 불러오기 (초기)
     async function fetchInitialStockData() {
