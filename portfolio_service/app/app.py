@@ -61,7 +61,7 @@ def create_app():
         init_app(app, current_config.PORTFOLIO_SCHEMA)
         db.create_all()
 
-    app.register_blueprint(portfolio)
+    app.register_blueprint(portfolio, url_prefix='/portfolio')
 
     def check_pending_orders():
         with app.app_context():
