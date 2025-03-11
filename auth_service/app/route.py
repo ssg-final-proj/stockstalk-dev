@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, request, url_for, jsonify, make_response
+from flask import Blueprint, render_template, session, redirect, request, url_for, jsonify, make_response
 from datetime import datetime, timezone
 from db import db, User
 from config import current_config
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 AUTH_SERVICE_URL = current_config.AUTH_SERVICE_URL
 PORTFOLIO_SERVICE_URL = current_config.PORTFOLIO_SERVICE_URL
 EXCHANGE_SERVICE_URL = current_config.EXCHANGE_SERVICE_URL
-STOCK_SERVICE_URL = current_config.BASE_URL # Stock Service는 BASE_URL 사용
+STOCK_SERVICE_URL = current_config.BASE_URL
 
 # Redis 설정
 redis_client_user = redis.StrictRedis(
@@ -28,13 +28,12 @@ redis_client_user = redis.StrictRedis(
 @auth.route("/", methods=["GET"])
 def kakaologin():
     kakao_id = request.cookies.get("kakao_id")
-
+    
     if kakao_id and redis_client_user.exists(f"session:{kakao_id}"):
         user_data = json.loads(redis_client_user.get(f"session:{kakao_id}"))
         if user_data.get("username") == "No username":
             return redirect(url_for('auth.set_username'))
         return redirect(STOCK_SERVICE_URL)  # stock-kr-service로 리다이렉트
-
     return render_template("auth.html", service_urls={
         'auth': AUTH_SERVICE_URL,
         'portfolio': PORTFOLIO_SERVICE_URL,
@@ -45,7 +44,7 @@ def kakaologin():
 @auth.route("/kakaoLoginLogic", methods=["GET"])
 def kakaoLoginLogic():
     redirect_uri = f"{AUTH_SERVICE_URL}/kakaoLoginLogicRedirect"
-    url = f"https://kauth.kakao.com/oauth/authorize?client_id={current_config.SECRET_KEY}&redirect_uri={redirect_uri}&response_type=code"
+    url = f"https://kauth.kakao.com/oauth/authorize?client_id={current_config.REST_API_KEY}&redirect_uri={redirect_uri}&response_type=code"
     return redirect(url)
 
 @auth.route("/kakaoLoginLogicRedirect", methods=["GET"])
@@ -58,7 +57,7 @@ def kakaoLoginLogicRedirect():
         "https://kauth.kakao.com/oauth/token",
         data={
             "grant_type": "authorization_code",
-            "client_id": current_config.SECRET_KEY,
+            "client_id": current_config.REST_API_KEY, # ✅ REST API KEY 사용
             "redirect_uri": f"{AUTH_SERVICE_URL}/kakaoLoginLogicRedirect",
             "code": code,
         },
@@ -150,25 +149,12 @@ def kakaoLoginLogicRedirect():
 @auth.route("/set_username", methods=["GET", "POST"])
 def set_username():
     kakao_id = request.cookies.get("kakao_id")
-
     if not kakao_id:
         return redirect(url_for("auth.kakaologin"))
 
     user = User.query.filter_by(kakao_id=kakao_id).first()
-
     if not user:
         return redirect(url_for("auth.kakaologin"))
-
-    user_data = {
-        "id": user.id,
-        "kakao_id": user.kakao_id,
-        "username": user.username,
-        "email": user.email,
-        "seed_krw": user.seed_krw,
-        "seed_usd": user.seed_usd,
-        "last_login": user.last_login.isoformat() if user.last_login else None,
-    }
-    redis_client_user.set(f"session:{kakao_id}", json.dumps(user_data), ex=86400)
 
     if request.method == "POST":
         new_username = request.form.get("username")
@@ -176,7 +162,15 @@ def set_username():
             user.username = new_username
             db.session.commit()
 
-            user_data["username"] = new_username
+            user_data = {
+                "id": user.id,
+                "kakao_id": user.kakao_id,
+                "username": user.username,
+                "email": user.email,
+                "seed_krw": user.seed_krw,
+                "seed_usd": user.seed_usd,
+                "last_login": user.last_login.isoformat() if user.last_login else None,
+            }
             redis_client_user.set(f"session:{kakao_id}", json.dumps(user_data), ex=86400)
 
             return redirect(STOCK_SERVICE_URL)
@@ -235,7 +229,7 @@ def update_user():
 
         # DB 업데이트
         user.seed_krw = seed_krw
-        user.seed_usd = seed_usd
+        user.seed_usd = data['seed_usd']
         db.session.commit()
 
         # Redis 업데이트
@@ -246,7 +240,5 @@ def update_user():
             redis_client_user.set(f'session:{kakao_id}', json.dumps(user_data), ex=86400)
 
         return jsonify({"message": "User updated successfully"}), 200
-
     except Exception as e:
-        logger.error(f"업데이트 에러: {e}")
         return jsonify({"error": str(e)}), 500

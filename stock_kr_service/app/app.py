@@ -185,7 +185,7 @@ def create_app():
         if user_data:
             user_data = json.loads(user_data)
 
-        return render_template('stock_kr.html', user_data=user_data)
+        return render_template('stock_kr.html', user_data=user_data, config=current_config)  # ✅ config 전달
 
     @app.route('/logout')
     def logout():
@@ -352,8 +352,8 @@ def create_app():
                 logger.error(f"주문 처리 중 오류 발생: {e}", exc_info=True)
                 return jsonify({"error": str(e)}), 500
 
-        return render_template('stock_kr_detail.html', code=code)
-        
+        return render_template('stock_kr_detail.html', code=code, config=current_config)  # ✅ config 전달
+    
     @app.route('/healthz', methods=['GET'])
     def health_check():
         """Liveness Probe - 컨테이너가 정상적으로 실행 중인지 확인"""

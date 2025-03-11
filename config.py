@@ -39,6 +39,9 @@ class Config:
     EXCHANGE_SERVICE_URL = os.getenv('EXCHANGE_SERVICE_URL', 'http://localhost:5000/exchange')
     PORTFOLIO_SERVICE_URL = os.getenv('PORTFOLIO_SERVICE_URL', 'http://localhost:5000/portfolio')
     
+    # ✅ KAKAO REST API KEY
+    REST_API_KEY = os.getenv('KAKAO_SECRET_KEY')
+    
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_ECHO = True
