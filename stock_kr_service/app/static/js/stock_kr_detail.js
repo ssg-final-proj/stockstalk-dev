@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const kakaoId = getCookie('kakao_id');
     if (!kakaoId) {
         console.error('사용자 ID가 없습니다.');
-        window.location.href = AUTH_SERVICE_URL + '/login';  // Config에서 가져온 URL 사용
+        window.location.href = AUTH_SERVICE_URL;  // Config에서 가져온 URL 사용
         return;
     }
 
@@ -213,7 +213,7 @@ async function submitOrder(orderType) {
     const kakaoId = getCookie('kakao_id');
     if (!kakaoId) {
         showError('로그인이 필요합니다.');
-        window.location.href = AUTH_SERVICE_URL + '/login';  // Config에서 가져온 URL 사용
+        window.location.href = AUTH_SERVICE_URL;  // Config에서 가져온 URL 사용
         return;
     }
 
