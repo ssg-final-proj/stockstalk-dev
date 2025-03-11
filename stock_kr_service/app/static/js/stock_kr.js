@@ -7,8 +7,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         AUTH_SERVICE_URL, 
         EXCHANGE_SERVICE_URL, 
         PORTFOLIO_SERVICE_URL 
-    } = window.CONFIG;
-    
+    } = window.CONFIG || {};  // CONFIG가 undefined일 경우 빈 객체로 처리
+
+    if (!AUTH_SERVICE_URL || !EXCHANGE_SERVICE_URL || !PORTFOLIO_SERVICE_URL) {
+        console.error("Config 값이 정의되지 않았습니다.");
+        return;
+    }
+
     // 로그인 상태 확인 함수
     async function checkLoginStatus() {
         try {
@@ -40,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         } catch (error) {
             console.error('로그인 상태 확인 실패:', error);
         }
+        
     }
 
     // 주식 데이터 불러오기 (초기)

@@ -8,9 +8,11 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         // Config 값을 JavaScript 변수로 전달
-        const AUTH_SERVICE_URL = "{{ config.AUTH_SERVICE_URL }}";
-        const EXCHANGE_SERVICE_URL = "{{ config.EXCHANGE_SERVICE_URL }}";
-        const PORTFOLIO_SERVICE_URL = "{{ config.PORTFOLIO_SERVICE_URL }}";
+        window.CONFIG = {
+            AUTH_SERVICE_URL: "{{ config.AUTH_SERVICE_URL }}",
+            EXCHANGE_SERVICE_URL: "{{ config.EXCHANGE_SERVICE_URL }}",
+            PORTFOLIO_SERVICE_URL: "{{ config.PORTFOLIO_SERVICE_URL }}"
+        };
     </script>
     <script src="{{ url_for('static', filename='js/stock_kr.js') }}"></script>
 </head>
