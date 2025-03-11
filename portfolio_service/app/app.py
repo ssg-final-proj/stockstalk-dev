@@ -19,6 +19,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+from sqlalchemy import text
 
 # Import configuration and database modules
 from config import config, current_config, ENV
@@ -198,6 +199,19 @@ def create_app():
         except Exception as e:
             logger.error(f"Error fetching portfolio data: {e}")
             return jsonify({"error": "Internal server error"}), 500
+        
+    @app.route('/healthz', methods=['GET'])
+    def health_check():
+        return jsonify({"status": "ok"}), 200
+    
+    @app.route('/readiness', methods=['GET'])
+    def readiness_check():
+        try:
+            with db.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return jsonify({"status": "ready"}), 200
+        except Exception as e:
+            return jsonify({"status": "not ready", "error": str(e)}), 500
         
     return app
 

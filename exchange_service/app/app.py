@@ -1,8 +1,9 @@
 import os
 import sys
 import logging
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from flask_migrate import Migrate
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
@@ -32,8 +33,23 @@ def create_app():
         db.create_all()
 
     app.register_blueprint(exchange, url_prefix='/exchange')
-
+    
+    @app.route('/healthz', methods=['GET'])
+    def health_check():
+        return jsonify({"status": "ok"}), 200
+    
+    @app.route('/readiness', methods=['GET'])
+    def readiness_check():
+        try:
+            with db.engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return jsonify({"status": "ready"}), 200
+        except Exception as e:
+            return jsonify({"status": "not ready", "error": str(e)}), 500
+        
     return app
+
+
 
 if __name__ == "__main__":
     handler = RotatingFileHandler('app.log', maxBytes=2000, backupCount=5)
