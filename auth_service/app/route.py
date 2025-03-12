@@ -135,12 +135,13 @@ def kakaoLoginLogicRedirect():
             "kakao_id",
             value=str(user_to_store.kakao_id),
             max_age=86400,
-            domain=".stockstalk.store",  # 모든 서브도메인에서 접근 가능
-            secure=True,               # HTTPS 전용
-            samesite="None",           # 크로스 사이트 허용
-            httponly=False             # JavaScript에서 접근 가능
+            domain=".stockstalk.store",  # 모든 서브도메인 적용
+            secure=True,                # HTTPS 필수
+            samesite="None",            # 크로스 사이트 허용
+            path="/",                   # 전체 경로 적용
+            httponly=False
         )
-        
+
         if user_data["username"] == "No username":
             response = redirect(url_for('auth.set_username'))  # 닉네임 설정 페이지로 리다이렉트
         else:
@@ -212,12 +213,22 @@ def logout():
 @auth.route("/check-login", methods=["GET"])
 def check_login():
     kakao_id = request.cookies.get("kakao_id")
+    logger.info(f"[DEBUG] 쿠키에서 추출한 kakao_id: {kakao_id}")
+    
+    if not kakao_id:
+        logger.warning("쿠키에 kakao_id 없음")
+        return jsonify({"loggedIn": False})
 
-    if kakao_id and redis_client_user.exists(f"session:{kakao_id}"):
-        user_data = json.loads(redis_client_user.get(f"session:{kakao_id}"))
-        return jsonify({"loggedIn": True, "kakao_id": user_data["kakao_id"], "user_data": user_data})
+    try:
+        user_data = redis_client_user.get(f"session:{kakao_id}")
+        logger.info(f"[DEBUG] Redis에서 조회한 사용자 데이터: {user_data}")
+        if user_data:
+            return jsonify({"loggedIn": True, "userData": json.loads(user_data)})
+        return jsonify({"loggedIn": False})
+    except Exception as e:
+        logger.error(f"[ERROR] 로그인 확인 실패: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
-    return jsonify({"loggedIn": False})
 
 @auth.route('/api/update_user', methods=['POST'])
 def update_user():
