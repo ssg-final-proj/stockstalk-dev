@@ -49,40 +49,37 @@ def kakaoLoginLogic():
 
 @auth.route("/kakaoLoginLogicRedirect", methods=["GET"])
 def kakaoLoginLogicRedirect():
+    """ 카카오 로그인 처리 후 사용자 정보 Redis에 저장 """
     code = request.args.get("code")
     if not code:
-        return "인증 코드 누락", 400
+        return "카카오 로그인 인증 코드가 없습니다.", 400
 
-    token_response = requests.post(
+    # 카카오에서 액세스 토큰 가져오기
+    response = requests.post(
         "https://kauth.kakao.com/oauth/token",
         data={
             "grant_type": "authorization_code",
-            "client_id": current_config.REST_API_KEY, # ✅ REST API KEY 사용
-            "redirect_uri": f"{AUTH_SERVICE_URL}/kakaoLoginLogicRedirect",
+            "client_id": REST_API_KEY,
+            "redirect_uri": REDIRECT_URI,
             "code": code,
         },
     )
 
-    if token_response.status_code != 200:
-        logger.error(f"토큰 요청 실패: {token_response.text}")
-        return "토큰 발급 실패", 500
-
-    access_token = token_response.json().get("access_token")
+    access_token = response.json().get("access_token")
     if not access_token:
         return "Access token 발급 실패.", 500
 
+    # 카카오에서 사용자 정보 가져오기
     kakao_user_info = requests.get(
         "https://kapi.kakao.com/v2/user/me",
         headers={"Authorization": f"Bearer {access_token}"},
     ).json()
 
-    if not kakao_user_info:
-        return "카카오 사용자 정보 획득 실패", 500
-
-    kakao_id = str(kakao_user_info.get("id"))
+    kakao_id = kakao_user_info.get("id")
     username = kakao_user_info.get("properties", {}).get("nickname", "No username")
     email = kakao_user_info.get("kakao_account", {}).get("email")
 
+    # 데이터베이스에서 사용자 확인
     user_to_store = User.query.filter_by(kakao_id=kakao_id).first()
 
     if not user_to_store:
@@ -101,7 +98,7 @@ def kakaoLoginLogicRedirect():
             db.session.refresh(user_to_store)
         except Exception as e:
             db.session.rollback()
-            logger.error(f"DB INSERT ERROR: {e}")
+            print(f"❌ DB INSERT ERROR: {e}")
             return "DB 오류 발생", 500
     else:
         try:
@@ -112,9 +109,10 @@ def kakaoLoginLogicRedirect():
             db.session.refresh(user_to_store)
         except Exception as e:
             db.session.rollback()
-            logger.error(f"DB UPDATE ERROR: {e}")
+            print(f"❌ DB UPDATE ERROR: {e}")
             return "DB 업데이트 오류 발생", 500
 
+    # Redis에 전체 사용자 데이터 저장
     user_data = {
         "id": user_to_store.id,
         "kakao_id": user_to_store.kakao_id,
@@ -124,41 +122,38 @@ def kakaoLoginLogicRedirect():
         "seed_usd": user_to_store.seed_usd,
         "last_login": user_to_store.last_login.isoformat(),
     }
-    
-    try:
-        redis_client_user.set(f"session:{user_to_store.kakao_id}", json.dumps(user_data), ex=86400)
-        logger.info(f"✅ Redis 세션 저장 성공: {user_to_store.kakao_id}")
-        # 쿠키 설정
-        response = make_response(redirect(STOCK_SERVICE_URL))
+    redis_client_user.set(f"session:{user_to_store.kakao_id}", json.dumps(user_data), ex=86400)
 
-        response.set_cookie(
-            "kakao_id",
-            value=str(user_to_store.kakao_id),
-            max_age=86400,
-            secure=True,  # HTTPS 필수
-            samesite="None",  # 크로스 사이트 허용
-            path="/",
-        )
+    # 쿠키에 kakao_id 저장 및 리다이렉트
+    if user_data["username"] == "No username":
+        redirect_url = url_for('auth.set_username')
+    else:
+        redirect_url = STOCK_SERVICE_URL
 
-        if user_data["username"] == "No username":
-            response = redirect(url_for('auth.set_username'))  # 닉네임 설정 페이지로 리다이렉트
-        else:
-            response = redirect(STOCK_SERVICE_URL)  # stock-kr-service로 리다이렉트
+    response = make_response(redirect(redirect_url))
+    response.set_cookie(
+        "kakao_id",
+        value=str(user_to_store.kakao_id),
+        max_age=86400,
+        secure=True,
+        samesite="Lax",
+        path="/",
+        httponly=False
+    )
 
-        logger.info(f"쿠키 설정 완료: {user_to_store.kakao_id}")
-        return response
-
-    except Exception as e:
-        logger.error(f"Redis 또는 쿠키 설정 오류: {e}")
-        return "Redis 또는 쿠키 설정 오류 발생", 500
+    print(f"✅ 쿠키 설정 완료: {user_to_store.kakao_id}")
+    return response
 
 @auth.route("/set_username", methods=["GET", "POST"])
 def set_username():
+    """ 사용자 닉네임 설정 """
     kakao_id = request.cookies.get("kakao_id")
+
     if not kakao_id:
         return redirect(url_for("auth.kakaologin"))
 
     user = User.query.filter_by(kakao_id=kakao_id).first()
+
     if not user:
         return redirect(url_for("auth.kakaologin"))
 
@@ -168,25 +163,17 @@ def set_username():
             user.username = new_username
             db.session.commit()
 
-            user_data = {
-                "id": user.id,
-                "kakao_id": user.kakao_id,
-                "username": user.username,
-                "email": user.email,
-                "seed_krw": user.seed_krw,
-                "seed_usd": user.seed_usd,
-                "last_login": user.last_login.isoformat() if user.last_login else None,
-            }
-            redis_client_user.set(f"session:{kakao_id}", json.dumps(user_data), ex=86400)
+            # Redis 업데이트
+            user_data = redis_client_user.get(f"session:{kakao_id}")
+            if user_data:
+                user_data = json.loads(user_data)
+                user_data["username"] = new_username
+                redis_client_user.set(f"session:{kakao_id}", json.dumps(user_data), ex=86400)
 
             return redirect(STOCK_SERVICE_URL)
 
-    return render_template("set_username.html",
-                           user=user_data,
-                           service_urls={
-                               'home': STOCK_SERVICE_URL,
-                               'portfolio': PORTFOLIO_SERVICE_URL
-                           })
+    return render_template("set_username.html")
+
 
 @auth.route("/check_nickname", methods=["GET"])
 def check_nickname():
@@ -208,7 +195,7 @@ def logout():
     response.delete_cookie("kakao_id", path='/', domain=".stockstalk.store")  # 쿠키 삭제 시 path 지정
     return response
 
-@auth.route("/check-login", methods=["GET"])
+@auth.route("/check-login", methods=["GET"]) # ✅ 명시적으로 GET 메서드 지정
 def check_login():
     kakao_id = request.cookies.get("kakao_id")
     logger.info(f"[DEBUG] 쿠키에서 추출한 kakao_id: {kakao_id}")
@@ -222,6 +209,7 @@ def check_login():
         logger.info(f"[DEBUG] Redis에서 조회한 사용자 데이터: {user_data}")
         if user_data:
             return jsonify({"loggedIn": True, "userData": json.loads(user_data)})
+        logger.warning("Redis에 사용자 데이터 없음")
         return jsonify({"loggedIn": False})
     except Exception as e:
         logger.error(f"[ERROR] 로그인 확인 실패: {str(e)}")
