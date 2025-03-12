@@ -30,7 +30,12 @@ def create_app():
     "http://localhost:8002",
     "https://www.stockstalk.store"]
 
-    CORS(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
+    CORS(app, resources={
+    r"/*": {
+        "origins": allowed_origins,
+        "supports_credentials": True,
+        "expose_headers": ["Set-Cookie"]
+    }})
 
     db.init_app(app)
 
