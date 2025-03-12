@@ -192,7 +192,7 @@ def logout():
         redis_client_user.delete(f"session:{kakao_id}")
 
     response = make_response(redirect(STOCK_SERVICE_URL))
-    response.delete_cookie("kakao_id", path='/', domain=".stockstalk.store")  # 쿠키 삭제 시 path 지정
+    response.delete_cookie("kakao_id", path='/')  # 쿠키 삭제 시 path 지정
     return response
 
 @auth.route("/check-login", methods=["GET"]) # ✅ 명시적으로 GET 메서드 지정
@@ -214,7 +214,6 @@ def check_login():
     except Exception as e:
         logger.error(f"[ERROR] 로그인 확인 실패: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 
 @auth.route('/api/update_user', methods=['POST'])
 def update_user():
