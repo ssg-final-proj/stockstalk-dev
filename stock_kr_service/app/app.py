@@ -187,47 +187,47 @@ def create_app():
 
         return render_template('stock_kr.html', user_data=user_data, config=current_config)  # ✅ config 전달
 
-    @app.route('/logout')
-    def logout():
-        if (kakao_id := request.cookies.get('kakao_id')):
-            redis_client_user.delete(f"session:{kakao_id}")  # Redis에서 세션 삭제
-        flash('로그아웃되었습니다!')
-        return redirect(url_for('home'))
+    # @app.route('/logout')
+    # def logout():
+    #     if (kakao_id := request.cookies.get('kakao_id')):
+    #         redis_client_user.delete(f"session:{kakao_id}")  # Redis에서 세션 삭제
+    #     flash('로그아웃되었습니다!')
+    #     return redirect(url_for('home'))
 
-    @app.route('/mypage')
-    def mypage():
-        if (kakao_id := request.cookies.get('kakao_id')):
-            return redirect(f'{current_config.PORTFOLIO_SERVICE_URL}')  # 로그인된 사용자는 마이페이지로 리디렉션
-        else:
-            return redirect(f'{current_config.AUTH_SERVICE_URL}')  # 로그인 안 된 사용자는 로그인 페이지로 리디렉션
+    # @app.route('/mypage')
+    # def mypage():
+    #     if (kakao_id := request.cookies.get('kakao_id')):
+    #         return redirect(f'{current_config.PORTFOLIO_SERVICE_URL}')  # 로그인된 사용자는 마이페이지로 리디렉션
+    #     else:
+    #         return redirect(f'{current_config.AUTH_SERVICE_URL}')  # 로그인 안 된 사용자는 로그인 페이지로 리디렉션
         
-    @app.route('/exchange')
-    def exchange():
-        if (kakao_id := request.cookies.get('kakao_id')):
-            return redirect(f'{current_config.EXCHANGE_SERVICE_URL}')
-        else:
-            return redirect(f'{current_config.AUTH_SERVICE_URL}')
+    # @app.route('/exchange')
+    # def exchange():
+    #     if (kakao_id := request.cookies.get('kakao_id')):
+    #         return redirect(f'{current_config.EXCHANGE_SERVICE_URL}')
+    #     else:
+    #         return redirect(f'{current_config.AUTH_SERVICE_URL}')
     
-    @app.route('/api/check-login', methods=['GET'])
-    def check_login():
-        kakao_id = request.cookies.get('kakao_id')
-        if not kakao_id:
-            return jsonify({"loggedIn": False})
+    # @app.route('/api/check-login', methods=['GET'])
+    # def check_login():
+    #     kakao_id = request.cookies.get('kakao_id')
+    #     if not kakao_id:
+    #         return jsonify({"loggedIn": False})
 
-        try:
-            user_data = redis_client_user.get(f'session:{kakao_id}')
-            if user_data:
-                user_data = json.loads(user_data)
-                return jsonify({
-                    "loggedIn": True,
-                    "userData": user_data  # Redis에서 가져온 사용자 정보 포함
-                })
-            else:
-                return jsonify({"loggedIn": False})
+    #     try:
+    #         user_data = redis_client_user.get(f'session:{kakao_id}')
+    #         if user_data:
+    #             user_data = json.loads(user_data)
+    #             return jsonify({
+    #                 "loggedIn": True,
+    #                 "userData": user_data  # Redis에서 가져온 사용자 정보 포함
+    #             })
+    #         else:
+    #             return jsonify({"loggedIn": False})
 
-        except Exception as e:
-            logger.error(f"Error while checking login: {e}")
-            return jsonify({"loggedIn": False, "error": str(e)})
+    #     except Exception as e:
+    #         logger.error(f"Error while checking login: {e}")
+    #         return jsonify({"loggedIn": False, "error": str(e)})
 
 
     @app.route('/login')

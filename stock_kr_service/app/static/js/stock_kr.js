@@ -17,11 +17,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 로그인 상태 확인 함수
     async function checkLoginStatus() {
         try {
-            const response = await fetch('/auth/api/check-login', { credentials: 'include' });
-            if (!response.ok) {
-                console.error('응답 상태 에러:', response.status);
-                return;
-            }
+            // ✅ Auth-Service의 API 호출 (Config 사용)
+            const response = await fetch(`${AUTH_SERVICE_URL}/check-login`, { 
+                credentials: 'include'  // 쿠키 전송 필수
+            });
             const data = await response.json();
             const navbarRight = document.querySelector('nav.navbar-right');
     
@@ -35,7 +34,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     
                 document.getElementById('logout-button').addEventListener('click', async function (event) {
                     event.preventDefault();
-                    await fetch('/logout', { method: 'GET', mode: 'no-cors' });
+                    // ✅ Auth-Service의 logout 호출
+                    await fetch(`${AUTH_SERVICE_URL}/logout`, { method: 'GET', mode: 'no-cors' });
                     alert('로그아웃되었습니다!');
                     window.location.reload();
                 });
@@ -43,13 +43,13 @@ document.addEventListener('DOMContentLoaded', async function () {
                 navbarRight.innerHTML = `
                     <a class="button" href="${EXCHANGE_SERVICE_URL}">환전하기</a>
                     <a class="button" href="${PORTFOLIO_SERVICE_URL}">마이페이지</a>
-                    <a class="button" href="${AUTH_SERVICE_URL}">로그인</a>
+                    <a class="button" href="${AUTH_SERVICE_URL}/login">로그인</a>
                 `;
             }
         } catch (error) {
             console.error('로그인 상태 확인 실패:', error);
         }
-    }
+    }    
     
 
     // 주식 데이터 불러오기 (초기)
