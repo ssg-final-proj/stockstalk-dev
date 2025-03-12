@@ -127,7 +127,7 @@ def kakaoLoginLogicRedirect():
     
     try:
         redis_client_user.set(f"session:{user_to_store.kakao_id}", json.dumps(user_data), ex=86400)
-
+        logger.info(f"✅ Redis 세션 저장 성공: {user_to_store.kakao_id}")
         # 쿠키 설정
         response = make_response(redirect(STOCK_SERVICE_URL))
 
@@ -137,9 +137,7 @@ def kakaoLoginLogicRedirect():
             max_age=86400,
             secure=True,  # HTTPS 필수
             samesite="None",  # 크로스 사이트 허용
-            domain=".stockstalk.store",  # 모든 서브도메인 적용
             path="/",
-            httponly=False
         )
 
         if user_data["username"] == "No username":
