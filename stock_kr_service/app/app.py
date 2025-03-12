@@ -123,7 +123,7 @@ redis_client_user = None
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'secret!')
-    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": current_config.BASE_URL}}, supports_credentials=True)
     app.logger.setLevel(logging.INFO)
 
     # Background tasks 관리자 초기화

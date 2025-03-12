@@ -25,7 +25,7 @@ def create_app():
     config_name = os.getenv('FLASK_ENV', 'development')
     app.config.from_object(config[config_name])
     
-    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": current_config.BASE_URL}}, supports_credentials=True)
     db.init_app(app)
 
     with app.app_context():

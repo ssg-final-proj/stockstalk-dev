@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     // 로그인 상태 확인 함수
     async function checkLoginStatus() {
         try {
-            const response = await fetch('/api/check-login', { credentials: 'include' });
+            const response = await fetch('/auth/api/check-login', { credentials: 'include' });
             if (!response.ok) {
                 console.error('응답 상태 에러:', response.status);
                 return;
