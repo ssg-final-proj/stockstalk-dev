@@ -25,16 +25,11 @@ def create_app():
     config_name = os.getenv('FLASK_ENV', 'development')
     app.config.from_object(config[config_name])
     
-    allowed_origins = [
-    current_config.BASE_URL,
-    "http://localhost:8002",
-    "https://www.stockstalk.store"]
-
-    CORS(app, resources={
-    r"/*": {
-        "origins": allowed_origins,
+    CORS(app, 
+    resources={r"/*": {
+        "origins": ["https://www.stockstalk.store"],
         "supports_credentials": True,
-        "expose_headers": ["Set-Cookie"]
+        "expose_headers": ["Set-Cookie"]  # 쿠키 헤더 노출
     }})
 
     db.init_app(app)
