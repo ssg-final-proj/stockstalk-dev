@@ -7,13 +7,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Config 값을 JavaScript 변수로 전달
         window.CONFIG = {
-            AUTH_SERVICE_URL: "{{ config.AUTH_SERVICE_URL }}",
-            EXCHANGE_SERVICE_URL: "{{ config.EXCHANGE_SERVICE_URL }}",
-            PORTFOLIO_SERVICE_URL: "{{ config.PORTFOLIO_SERVICE_URL }}"
+            AUTH_SERVICE_URL: "{{ config.AUTH_SERVICE_URL | replace('http://', 'https://') }}",  // 🔄 자동 HTTPS 변환
+            EXCHANGE_SERVICE_URL: "{{ config.EXCHANGE_SERVICE_URL | replace('http://', 'https://') }}",
+            PORTFOLIO_SERVICE_URL: "{{ config.PORTFOLIO_SERVICE_URL | replace('http://', 'https://') }}"
         };
-    </script>
+        </script>
     <script src="{{ url_for('static', filename='js/stock_kr.js') }}"></script>
 </head>
 <body>

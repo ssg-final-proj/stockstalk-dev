@@ -37,7 +37,6 @@ class Config:
     AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "https://www.stockstalk.store/auth")
     EXCHANGE_SERVICE_URL = os.getenv("EXCHANGE_SERVICE_URL", "https://www.stockstalk.store/exchange")
     PORTFOLIO_SERVICE_URL = os.getenv("PORTFOLIO_SERVICE_URL", "https://www.stockstalk.store/portfolio")
-    
     REST_API_KEY = os.getenv('KAKAO_SECRET_KEY')
     
     COOKIE_DOMAIN = os.getenv('COOKIE_DOMAIN', '.stockstalk.store')

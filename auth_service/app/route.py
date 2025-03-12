@@ -135,9 +135,7 @@ def kakaoLoginLogicRedirect():
             "kakao_id",
             value=str(user_to_store.kakao_id),
             max_age=86400,
-            domain=current_config.COOKIE_DOMAIN,
-            secure=current_config.SECURE_COOKIES,
-            samesite="None" if current_config.SECURE_COOKIES else "Lax",
+            secure=True,
             path="/",
             httponly=False
         )
