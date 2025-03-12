@@ -137,9 +137,10 @@ def kakaoLoginLogicRedirect():
             max_age=86400,
             secure=True,
             path="/",
-            httponly=False
+            httponly=False,
+            samesite="None"  # ✅ 반드시 추가!
         )
-
+        
         if user_data["username"] == "No username":
             response = redirect(url_for('auth.set_username'))  # 닉네임 설정 페이지로 리다이렉트
         else:
