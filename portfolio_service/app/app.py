@@ -480,7 +480,6 @@ def process_order(event, session):
         logger.error(f"Error processing order: {e}", exc_info=True)
         raise
 
-        
 if __name__ == "__main__":
     app = create_app()
     app.run(host="0.0.0.0", port=8003, debug=False)

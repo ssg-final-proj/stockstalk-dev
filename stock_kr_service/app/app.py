@@ -229,7 +229,6 @@ def create_app():
     #         logger.error(f"Error while checking login: {e}")
     #         return jsonify({"loggedIn": False, "error": str(e)})
 
-
     @app.route('/login')
     def login():
         return redirect(f'{current_config.AUTH_SERVICE_URL}')
