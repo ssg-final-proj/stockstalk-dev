@@ -59,8 +59,8 @@ def kakaoLoginLogicRedirect():
         "https://kauth.kakao.com/oauth/token",
         data={
             "grant_type": "authorization_code",
-            "client_id": REST_API_KEY,
-            "redirect_uri": REDIRECT_URI,
+            "client_id": current_config.REST_API_KEY, # ✅ REST API KEY 사용
+            "redirect_uri": f"{AUTH_SERVICE_URL}/kakaoLoginLogicRedirect",
             "code": code,
         },
     )
@@ -195,25 +195,21 @@ def logout():
     response.delete_cookie("kakao_id", path='/')  # 쿠키 삭제 시 path 지정
     return response
 
-@auth.route("/check-login", methods=["GET"]) # ✅ 명시적으로 GET 메서드 지정
+@auth.route("/check-login", methods=["GET"])
 def check_login():
     kakao_id = request.cookies.get("kakao_id")
-    logger.info(f"[DEBUG] 쿠키에서 추출한 kakao_id: {kakao_id}")
+    logger.info(f"[DEBUG] 쿠키 값: {kakao_id}")  # ✅ 쿠키 존재 여부 로깅
     
     if not kakao_id:
-        logger.warning("쿠키에 kakao_id 없음")
+        logger.warning("쿠키 미존재")
         return jsonify({"loggedIn": False})
-
-    try:
-        user_data = redis_client_user.get(f"session:{kakao_id}")
-        logger.info(f"[DEBUG] Redis에서 조회한 사용자 데이터: {user_data}")
-        if user_data:
-            return jsonify({"loggedIn": True, "userData": json.loads(user_data)})
-        logger.warning("Redis에 사용자 데이터 없음")
-        return jsonify({"loggedIn": False})
-    except Exception as e:
-        logger.error(f"[ERROR] 로그인 확인 실패: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+    
+    user_data = redis_client_user.get(f"session:{kakao_id}")
+    logger.info(f"[DEBUG] Redis 키: session:{kakao_id}, 데이터: {user_data}")  # ✅ Redis 데이터 로깅
+    
+    if user_data:
+        return jsonify({"loggedIn": True, "userData": json.loads(user_data)})
+    return jsonify({"loggedIn": False})
 
 @auth.route('/api/update_user', methods=['POST'])
 def update_user():
