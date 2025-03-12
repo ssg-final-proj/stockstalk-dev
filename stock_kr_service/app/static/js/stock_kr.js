@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         try {
             // ✅ Auth-Service의 API 호출 (Config 사용)
             const response = await fetch(`${AUTH_SERVICE_URL}/check-login`, { 
-                credentials: 'include'  // 쿠키 전송 필수
+                credentials: 'include',  // 쿠키 전송 필수
+                mode: 'cors'
             });
             const data = await response.json();
             const navbarRight = document.querySelector('nav.navbar-right');
