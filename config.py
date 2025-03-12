@@ -39,6 +39,7 @@ class Config:
     PORTFOLIO_SERVICE_URL = os.getenv("PORTFOLIO_SERVICE_URL", "https://www.stockstalk.store/portfolio")
     REST_API_KEY = os.getenv('KAKAO_SECRET_KEY')
     
+    SESSION_COOKIE_SECURE = True
     COOKIE_DOMAIN = os.getenv('COOKIE_DOMAIN', '.stockstalk.store')
     SECURE_COOKIES = os.getenv('SECURE_COOKIES', 'True').lower() == 'true'
 

@@ -134,11 +134,11 @@ def kakaoLoginLogicRedirect():
     response.set_cookie(
         "kakao_id",
         value=str(user_to_store.kakao_id),
+        domain=".stockstalk.store",
         max_age=86400,
         secure=True,
         samesite="Lax",
         path="/",
-        httponly=False
     )
 
     print(f"✅ 쿠키 설정 완료: {user_to_store.kakao_id}")
