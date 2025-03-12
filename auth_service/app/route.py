@@ -135,10 +135,10 @@ def kakaoLoginLogicRedirect():
             "kakao_id",
             value=str(user_to_store.kakao_id),
             max_age=86400,
-            domain=".stockstalk.store",  # 모든 서브도메인 적용
-            secure=True,                # HTTPS 필수
-            samesite="None",            # 크로스 사이트 허용
-            path="/",                   # 전체 경로 적용
+            domain=current_config.COOKIE_DOMAIN,
+            secure=current_config.SECURE_COOKIES,
+            samesite="None" if current_config.SECURE_COOKIES else "Lax",
+            path="/",
             httponly=False
         )
 

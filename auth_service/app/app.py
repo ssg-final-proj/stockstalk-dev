@@ -24,8 +24,13 @@ def create_app():
     app = Flask(__name__)
     config_name = os.getenv('FLASK_ENV', 'development')
     app.config.from_object(config[config_name])
+    
+    allowed_origins = [
+    current_config.BASE_URL,
+    "http://localhost:8002",
+    "https://www.stockstalk.store"]
 
-    CORS(app, resources={r"/*": {"origins": current_config.BASE_URL}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
 
     db.init_app(app)
 

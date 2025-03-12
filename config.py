@@ -33,18 +33,21 @@ class Config:
         'stock' : SQLALCHEMY_DATABASE_URI + '/' + PORTFOLIO_SCHEMA,
     }
 
-    # ✅ BASE_URL 추가
-    BASE_URL = os.getenv('URL', 'http://stock-kr-service:8002')
-    AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:8001")
-    EXCHANGE_SERVICE_URL = os.getenv("EXCHANGE_SERVICE_URL", "http://exchange-service:8004")
-    PORTFOLIO_SERVICE_URL = os.getenv("PORTFOLIO_SERVICE_URL", "http://portfolio-service:8003")
+    BASE_URL = os.getenv('URL', 'https://www.stockstalk.store')
+    AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "https://www.stockstalk.store/auth")
+    EXCHANGE_SERVICE_URL = os.getenv("EXCHANGE_SERVICE_URL", "https://www.stockstalk.store/exchange")
+    PORTFOLIO_SERVICE_URL = os.getenv("PORTFOLIO_SERVICE_URL", "https://www.stockstalk.store/portfolio")
     
-    # ✅ KAKAO REST API KEY
     REST_API_KEY = os.getenv('KAKAO_SECRET_KEY')
     
+    COOKIE_DOMAIN = os.getenv('COOKIE_DOMAIN', '.stockstalk.store')
+    SECURE_COOKIES = os.getenv('SECURE_COOKIES', 'True').lower() == 'true'
+
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_ECHO = True
+    COOKIE_DOMAIN = 'localhost'
+    SECURE_COOKIES = False
 
 class ProductionConfig(Config):
     DEBUG = False
