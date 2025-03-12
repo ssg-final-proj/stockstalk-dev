@@ -123,7 +123,7 @@ redis_client_user = None
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'secret!')
-    CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
     app.logger.setLevel(logging.INFO)
 
     # Background tasks 관리자 초기화
@@ -211,17 +211,24 @@ def create_app():
     @app.route('/api/check-login', methods=['GET'])
     def check_login():
         kakao_id = request.cookies.get('kakao_id')
-        try:
-            if kakao_id:
-                user_data = redis_client_user.get(f'session:{kakao_id}')
-                if user_data:
-                    return jsonify({
-                        "loggedIn": True,  # ✅ camelCase로 통일
-                        "userData": json.loads(user_data)
-                    })
+        if not kakao_id:
             return jsonify({"loggedIn": False})
+
+        try:
+            user_data = redis_client_user.get(f'session:{kakao_id}')
+            if user_data:
+                user_data = json.loads(user_data)
+                return jsonify({
+                    "loggedIn": True,
+                    "userData": user_data  # Redis에서 가져온 사용자 정보 포함
+                })
+            else:
+                return jsonify({"loggedIn": False})
+
         except Exception as e:
-            return jsonify({"error": str(e)}), 500
+            logger.error(f"Error while checking login: {e}")
+            return jsonify({"loggedIn": False, "error": str(e)})
+
 
     @app.route('/login')
     def login():
