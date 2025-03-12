@@ -9,7 +9,7 @@ class Config:
         'pool_recycle': 280,
     }
 
-    REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
+    REDIS_HOST = os.getenv('REDIS_HOST', 'redis.infra.svc.cluster.local')
     REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
     CACHE_DURATION = int(os.getenv('CACHE_DURATION', 100))
     KAFKA_BROKER_HOST = os.getenv('KAFKA_BROKER_HOST', 'kafka:9092')
