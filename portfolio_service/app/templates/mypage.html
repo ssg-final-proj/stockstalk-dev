@@ -115,16 +115,16 @@
                                 </td>                                
                                 <td>{{ "{:,.0f}".format(order.target_price) if order.target_price is not none else 'N/A' }} KRW</td>
                                 <td>{{ order.quantity|int }}주</td>
-                                <td>
-                                    {% if order.status == "PENDING" %}
-                                        대기 중
-                                    {% elif order.status == "COMPLETED" %}
-                                        완료됨
-                                    {% else %}
-                                        취소됨
-                                    {% endif %}
+                                <td class="{% if order.status == 'COMPLETED' %}completed{% elif order.status == 'PENDING' %}pending{% else %}canceled{% endif %}">
+                                    {{ "완료됨" if order.status == "COMPLETED" else "대기 중" if order.status == "PENDING" else "취소됨" }}
                                 </td>
                                 <td>{{ order.created_at }}</td>
+                                <td>
+                                    {% if order.status == "PENDING" %}
+                                        <!-- 취소 버튼 추가 -->
+                                        <button onclick="cancelOrder('{{ order.id }}')">취소</button>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>

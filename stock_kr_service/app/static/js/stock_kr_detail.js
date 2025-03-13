@@ -270,7 +270,7 @@ async function fetchOrderHistory(stockCode) {
     }
 
     try {
-        const response = await fetch(`${PORTFOLIO_SERVICE_URL}/api/order-history?code=${stockCode}&kakao_id=${kakaoId}`);
+        const response = await fetch(`${window.CONFIG.PORTFOLIO_SERVICE_URL}/api/order-history?code=${stockCode}&kakao_id=${kakaoId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
