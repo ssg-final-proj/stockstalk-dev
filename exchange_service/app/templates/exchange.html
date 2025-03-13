@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>환전</title>
-    <link rel="stylesheet" href="/static/css/exchange.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/exchange.css') }}">
+    <script src="{{ url_for('static', filename='js/exchange.js') }}"></script>
 
     {% if error %}
     <script>
@@ -55,6 +56,5 @@
     </main>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1504.0.min.js"></script>
     <script src="https://chikenstalk.s3.amazonaws.com/chatbot.js"></script>
-    <script src="/static/js/exchange.js"></script>
 </body>
 </html>

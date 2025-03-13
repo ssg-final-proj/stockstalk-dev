@@ -140,7 +140,6 @@ def kakaoLoginLogicRedirect():
         samesite="Lax",
         path="/",
     )
-
     print(f"✅ 쿠키 설정 완료: {user_to_store.kakao_id}")
     return response
 
