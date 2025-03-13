@@ -77,7 +77,8 @@ if __name__ == "__main__":
     handler = RotatingFileHandler('app.log', maxBytes=2000, backupCount=5)
     logging.basicConfig()
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
-
     app = create_app()
     migrate = Migrate(app, db)
-    app.run(host="0.0.0.0", port=8001, debug=True)
+    app.config['DEBUG'] = True
+    app.config['TEMPLATES_AUTO_RELOAD'] 
+    app.run(host="0.0.0.0", port=8001)

@@ -57,4 +57,6 @@ if __name__ == "__main__":
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
     app = create_app()
-    app.run(host="0.0.0.0", port=8004, debug=True)
+    app.config['DEBUG'] = True
+    app.config['TEMPLATES_AUTO_RELOAD'] 
+    app.run(host="0.0.0.0", port=8004)
