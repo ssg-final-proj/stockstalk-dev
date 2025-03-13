@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, url_for
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from logging.handlers import RotatingFileHandler
@@ -59,7 +59,18 @@ def create_app():
             return jsonify({"status": "ready"}), 200
         except Exception as e:
             return jsonify({"status": "not ready", "error": str(e)}), 500
+    @app.context_processor
+    def override_url_for():
+        return dict(url_for=dated_url_for)
 
+    def dated_url_for(endpoint, **values):
+        if endpoint == 'static':
+            filename = values.get('filename', None)
+            if filename:
+                file_path = os.path.join(app.root_path, endpoint, filename)
+                values['v'] = int(os.stat(file_path).st_mtime)
+        return url_for(endpoint, **values)
+    
     return app
 
 if __name__ == "__main__":
