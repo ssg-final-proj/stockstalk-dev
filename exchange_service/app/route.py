@@ -172,14 +172,18 @@ def handle_exchange():
 
 @exchange.route('/get_balance', methods=['POST'])
 def get_balance():
-    kakao_id = request.cookies.get('kakao_id')
-    if not kakao_id:
-        return jsonify({"error": "로그인 필요"}), 401
+    try:
+        kakao_id = request.cookies.get('kakao_id')
+        if not kakao_id:
+            return jsonify({"error": "로그인 필요"}), 401  # ✅ JSON 반환
 
-    user_data = get_user_from_redis(kakao_id)
-    if not user_data:
-        return jsonify({"error": "사용자 정보 없음"}), 404
+        user_data = get_user_from_redis(kakao_id)
+        if not user_data:
+            return jsonify({"error": "사용자 정보 없음"}), 404  # ✅ JSON 반환
 
-    currency_pair = request.json.get('currency_pair')
-    balance = user_data['seed_krw'] if currency_pair == 'KRW_to_USD' else user_data['seed_usd']
-    return jsonify({'balance': balance})
+        currency_pair = request.json.get('currency_pair')
+        balance = user_data['seed_krw'] if currency_pair == 'KRW_to_USD' else user_data['seed_usd']
+        return jsonify({'balance': balance})  # ✅ JSON 반환
+    except Exception as e:
+        logger.error(f"❌ 잔액 조회 오류: {str(e)}")
+        return jsonify({"error": "서버 내부 오류"}), 500  # ✅ 모든 오류 JSON 처리

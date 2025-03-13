@@ -47,13 +47,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // 서버로 사용자 잔액 요청
-        fetch("/get_balance", {
+        fetch(`${window.CONFIG.EXCHANGE_SERVICE_URL}/get_balance`, {  // ✅ 절대 URL 사용
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Accept": "application/json"  // ✅ 서버에 JSON 요청 명시
             },
-            body: JSON.stringify({ currency_pair: selectedPair }),
-        })
+            body: JSON.stringify({ currency_pair: selectedPair })
+        })        
             .then((response) => response.json())
             .then((data) => {
                 console.log(data);  // 서버 응답 출력
