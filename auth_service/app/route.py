@@ -7,7 +7,13 @@ import logging
 import json
 import redis
 
-auth = Blueprint("auth", __name__)
+auth = Blueprint(
+    'auth',
+    __name__,
+    static_folder='static',
+    static_url_path='/auth/static'
+)
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
