@@ -316,7 +316,10 @@ function updateOrderHistoryUI(orders) {
     }
 }
 
-const socket = io('/stock');
+const socket = io(`${BASE_URL}/stock`, {
+    path: '/socket.io',
+    transports: ['websocket']
+  });
 
 socket.on('connect', function() {
     console.log('WebSocket 연결됨');
