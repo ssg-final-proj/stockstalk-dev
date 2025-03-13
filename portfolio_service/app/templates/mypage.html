@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지</title>
-    <!-- ✅ Blueprint별 고유 CSS 적용 -->
     <link rel="stylesheet" href="{{ url_for('portfolio.static', filename='css/mypage.css', v=1) }}">
     
     {% if error %}
@@ -15,160 +14,150 @@
     {% endif %}
 </head>
 <body>
-    <!-- 헤더 구조 개선 -->
-    <header class="portfolio-header">
-        <div class="header-container">
-            <h1 class="portfolio-title">가상 주식 시뮬레이션</h1>
-            <div class="user-info-box">
-                <p class="username">{{ user.username if user else "로그인 필요" }}님의 포트폴리오</p>
-                <div class="balance-display">
-                    <span class="balance-krw">{{ "{:,.0f}".format(user['seed_krw']) if user else "0" }} KRW</span>
-                    <span class="balance-usd">{{ "{:,.2f}".format(user['seed_usd']) if user else "0.00" }} USD</span>
-                </div>
-            </div>
-            <nav class="portfolio-nav">
-                <a href="{{ service_urls.home }}" class="nav-btn">홈</a>
-                <a href="{{ service_urls.exchange }}" class="nav-btn">환전하기</a>
+    <header>
+        <div class="header-content">
+            <h1>가상 주식 시뮬레이션</h1>
+            <p>{{ user.username if user else "로그인이 필요합니다." }}님의 마이페이지</p>
+            <nav class="navbar">
+                <a href="{{ service_urls.home }}">홈</a>
+                <a href="{{ service_urls.exchange }}">환전하기</a>
             </nav>
         </div>
     </header>
-
-    <main class="portfolio-main">
-        <!-- 보유 자산 섹션 -->
-        <section class="asset-section">
-            <h2 class="section-title">📊 투자 성과 분석</h2>
-            <div class="performance-metrics">
-                <div class="metric-card total-return">
-                    <h3>전체 수익률</h3>
-                    <p class="metric-value">
-                        {% if profit_rate_total is defined and profit_rate_total is not none %}
-                            {{ "{:,.2f}".format(profit_rate_total) }}%
-                        {% else %}
-                            -
-                        {% endif %}
-                    </p>
-                </div>
-                <div class="metric-card current-rank">
-                    <h3>현재 순위</h3>
-                    <p class="metric-value">
-                        {% if p_rank is defined and p_rank is not none %}
-                            #{{ p_rank }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
+    <main>
+        <section class="user-info">
+            <h2>보유 자산</h2>
+            {% if user %}
+                <p><strong>닉네임:</strong> {{ user.username }}</p>
+                <p><strong>보유 원화:</strong> {{ "{:,.0f}".format(user['seed_krw']) }} KRW</p>
+                <p><strong>보유 달러:</strong> {{ "{:,.2f}".format(user['seed_usd']) }} USD</p>
+                
+                <h2>전체 투자 성과</h2>
+                <p><strong>전체 수익률:</strong> 
+                    {% if profit_rate_total is defined and profit_rate_total is not none %}
+                        {{ "{:,.2f}".format(profit_rate_total) }}%
+                    {% else %}
+                        데이터 없음
+                    {% endif %}
+                </p>
+                <p><strong>현재 순위:</strong> 
+                    {% if p_rank is defined and p_rank is not none %}
+                        {{ p_rank }}위
+                    {% else %}
+                        데이터 없음
+                    {% endif %}
+                </p>
+            {% else %}
+                <p>로그인이 필요합니다.</p>
+            {% endif %}
         </section>
 
-        <!-- 보유 종목 테이블 -->
-        <section class="holdings-section">
-            <h2 class="section-title">📦 보유 종목</h2>
+        <section class="portfolio">
+            <h2>보유 종목</h2>
             {% if portfolio %}
-            <div class="holdings-table-container">
-                <table class="holdings-table">
+                <table>
                     <thead>
                         <tr>
-                            <th class="stock-name">종목명</th>
-                            <th class="quantity">보유량</th>
-                            <th class="current-value">현재 가치</th>
-                            <th class="investment">투자액</th>
-                            <th class="return-rate">수익률</th>
+                            <th>종목 이름</th>
+                            <th>수량</th>
+                            <th>총 가치</th>
+                            <th>초기 투자액</th>
+                            <th>수익률</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for portfolio_item, stock_name in portfolio %}
-                        <tr class="holding-item">
-                            <td class="stock-name">{{ stock_name }}</td>
-                            <td class="quantity">{{ portfolio_item.stock_amount|int }}주</td>
-                            <td class="current-value">{{ "{:,.0f}".format(portfolio_item.total_value) }} KRW</td>
-                            <td class="investment">{{ "{:,.0f}".format(portfolio_item.initial_investment) }} KRW</td>
-                            <td class="return-rate {% if portfolio_item.profit_rate > 0 %}positive{% elif portfolio_item.profit_rate < 0 %}negative{% else %}neutral{% endif %}">
-                                {% if portfolio_item.initial_investment > 0 %}
-                                    {% if portfolio_item.real_time_profit_rate is defined %}
-                                        {{ "{:+.2f}".format(portfolio_item.real_time_profit_rate) }}%
+                            <tr>
+                                <td>{{ stock_name }}</td>
+                                <td>{{ portfolio_item.stock_amount|int }}주</td>
+                                <td>{{ "{:,.0f}".format(portfolio_item.total_value) }} KRW</td>
+                                <td>{{ "{:,.0f}".format(portfolio_item.initial_investment) }} KRW</td>
+                                <td class="{% if portfolio_item.profit_rate > 0 %}profit-positive{% elif portfolio_item.profit_rate < 0 %}profit-negative{% else %}profit-zero{% endif %}">
+                                    {% if portfolio_item.initial_investment > 0 %}
+                                        {% if portfolio_item.real_time_profit_rate is defined %}
+                                            {{ "{:,.2f}".format(portfolio_item.real_time_profit_rate) }}%
+                                        {% else %}
+                                            {{ "{:,.2f}".format(portfolio_item.profit_rate) }}%
+                                        {% endif %}
                                     {% else %}
-                                        {{ "{:+.2f}".format(portfolio_item.profit_rate) }}%
+                                        0%
                                     {% endif %}
-                                {% else %}
-                                    0.00%
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
+                                </td>                                                            
+                            </tr>
+                        {% endfor %}          
                     </tbody>
                 </table>
-            </div>
             {% else %}
-            <p class="no-data">보유 종목이 없습니다</p>
+                <p>보유 종목이 없습니다.</p>
             {% endif %}
         </section>
 
-        <!-- 주문 내역 테이블 -->
-        <section class="order-section">
-            <h2 class="section-title">⏳ 최근 거래 내역</h2>
+        <section class="order-history">
+            <h2>주문 내역</h2>
             {% if today_orders %}
-            <div class="order-table-container">
-                <table class="order-table">
+                <table>
                     <thead>
                         <tr>
-                            <th class="stock-name">종목</th>
-                            <th class="order-type">유형</th>
-                            <th class="order-price">가격</th>
-                            <th class="quantity">수량</th>
-                            <th class="status">상태</th>
-                            <th class="timestamp">시간</th>
+                            <th>종목명</th>
+                            <th>주문 종류</th>
+                            <th>주문 가격</th>
+                            <th>수량</th>
+                            <th>상태</th>
+                            <th>주문 시간</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for order, stock_name in today_orders %}
-                        <tr class="order-item">
-                            <td class="stock-name">{{ stock_name }}</td>
-                            <td class="order-type {% if order.order_type == 'BUY' %}buy{% else %}sell{% endif %}">
-                                {{ "매수" if order.order_type == "BUY" else "매도" }}
-                            </td>
-                            <td class="order-price">{{ "{:,.0f}".format(order.target_price) if order.target_price else 'N/A' }} KRW</td>
-                            <td class="quantity">{{ order.quantity|int }}주</td>
-                            <td class="status">
-                                <span class="status-badge {% if order.status == 'COMPLETED' %}completed{% elif order.status == 'PENDING' %}pending{% else %}canceled{% endif %}">
-                                    {{ "완료" if order.status == "COMPLETED" else "대기중" if order.status == "PENDING" else "취소됨" }}
-                                </span>
-                            </td>
-                            <td class="timestamp">{{ order.created_at }}</td>
-                        </tr>
+                            <tr>
+                                <td>{{ stock_name }}</td>
+                                <td class="{% if order.order_type == 'BUY' %}order-type-buy{% else %}order-type-sell{% endif %}">
+                                    {{ "매수" if order.order_type == "BUY" else "매도" }}
+                                </td>                                
+                                <td>{{ "{:,.0f}".format(order.target_price) if order.target_price is not none else 'N/A' }} KRW</td>
+                                <td>{{ order.quantity|int }}주</td>
+                                <td>
+                                    {% if order.status == "PENDING" %}
+                                        대기 중
+                                    {% elif order.status == "COMPLETED" %}
+                                        완료됨
+                                    {% else %}
+                                        취소됨
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.created_at }}</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
             {% else %}
-            <p class="no-data">최근 거래 내역이 없습니다</p>
+                <p>현재 주문 내역이 없습니다.</p>
             {% endif %}
-        </section>
+        </section>        
     </main>
 
-    <!-- Script 부분 개선 -->
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // 주문 취소 핸들러
-        window.cancelOrder = async (orderId) => {
-            try {
-                const response = await fetch('/api/cancel-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ order_id: orderId })
-                });
-                
-                const data = await response.json();
-                if (data.error) throw new Error(data.error);
-                
-                alert('주문이 취소되었습니다');
-                location.reload();
-            } catch (error) {
+        function cancelOrder(orderId) {
+            fetch('/api/cancel-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ order_id: orderId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    location.reload();
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
                 console.error('Error:', error);
-                alert(`주문 취소 실패: ${error.message}`);
-            }
-        };
-    });
+                alert('주문 취소 중 오류가 발생했습니다.');
+            });
+        }
     </script>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1504.0.min.js"></script>
     <script src="https://chikenstalk.s3.amazonaws.com/chatbot.js"></script>
