@@ -177,7 +177,7 @@ def create_app():
 
     atexit.register(lambda: scheduler.shutdown(wait=False))
 
-    @app.route('/api/portfolio/<kakao_id>/<stock_symbol>', methods=['GET'])
+    @app.route('portfolio/api/portfolio/<kakao_id>/<stock_symbol>', methods=['GET'])
     def get_portfolio_stock(kakao_id, stock_symbol):
         logger.info(f"get_portfolio_stock 함수 호출: kakao_id={kakao_id}, stock_symbol={stock_symbol}")  # 로그 추가
         try:
