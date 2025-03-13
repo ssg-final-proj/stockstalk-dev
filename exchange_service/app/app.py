@@ -21,7 +21,7 @@ from config import config
 from route import exchange
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder="static", static_url_path="/static")
     config_name = os.getenv('FLASK_ENV', 'development')
     app.config.from_object(config[config_name])
     
