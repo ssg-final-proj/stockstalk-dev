@@ -11,11 +11,11 @@ jobs:
     strategy:
       matrix:
         service: [auth_service, stock_kr_service, exchange_service, portfolio_service]
-
+    
     env:
       AWS_REGION: ap-northeast-2
       ECR_REGISTRY: 707677861059.dkr.ecr.ap-northeast-2.amazonaws.com
-      IMAGE_TAG: latest
+      IMAGE_TAG: latest  # ⚠️ 추후 고유 태그 (예: github.sha) 사용 권장
 
     steps:
       - name: Checkout code with full history
@@ -36,19 +36,20 @@ jobs:
       - name: Check changes and build/push service if needed
         run: |
           PREV_COMMIT=$(git rev-parse HEAD~1)
+          # ✅ 정적 파일 경로 추가: static/ 디렉토리 변경 감지
           CHANGED_FILES=$(git diff --name-only $PREV_COMMIT HEAD)
           echo "Changed files: $CHANGED_FILES"
-          if echo "$CHANGED_FILES" | grep -qE "^${{ matrix.service }}/|^config\.py|^db\.py|^\.env"; then
+          if echo "$CHANGED_FILES" | grep -qE "^${{ matrix.service }}/|^config\.py|^db\.py|^\.env|/static/"; then
             echo "Preparing ${{ matrix.service }}..."
             cp config.py ${{ matrix.service }}/
             cp db.py ${{ matrix.service }}/
             cp .env ${{ matrix.service }}/
             if [ "${{ matrix.service }}" == "stock_kr_service" ]; then
-              # koreainvestment.key is already in stock_kr_service directory
               echo "koreainvestment.key is already in stock_kr_service directory"
             fi
+            # ✅ Docker 캐시 무시 및 강제 빌드
             echo "Building and pushing ${{ matrix.service }}..."
-            docker build -t $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG ./${{ matrix.service }}
+            docker build --no-cache -t $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG ./${{ matrix.service }}
             docker push $ECR_REGISTRY/${{ matrix.service }}:$IMAGE_TAG
             echo "Pushed ${{ matrix.service }} to ECR successfully."
             # Clean up
