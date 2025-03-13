@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>환전</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/exchange.css') }}">
-    <script src="{{ url_for('static', filename='js/exchange.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('exchange.static', filename='css/exchange.css') }}">
+    <script src="{{ url_for('exchange.static', filename='js/exchange.js') }}"></script>
 
     {% if error %}
     <script>

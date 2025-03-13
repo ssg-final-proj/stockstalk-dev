@@ -12,7 +12,12 @@ from config import current_config
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-exchange = Blueprint("exchange", __name__)
+exchange = Blueprint(
+    'exchange',
+    __name__,
+    static_folder='static',
+    static_url_path='/exchange/static'
+)
 
 redis_client_user = redis.StrictRedis(
     host=current_config.REDIS_HOST,

@@ -18,7 +18,12 @@ redis_client_user = redis.StrictRedis(host=os.getenv("REDIS_HOST"), port=int(os.
 redis_client_lock = redis.StrictRedis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT", 6379)), db=2, decode_responses=True)
 redis_client_profit = redis.StrictRedis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT", 6379)), db=3, decode_responses=True)
 
-portfolio = Blueprint("portfolio", __name__)
+portfolio = Blueprint(
+    'portfolio',
+    __name__,
+    static_folder='static',
+    static_url_path='/portfolio/static'
+)
 
 # Config에서 서비스 URL 직접 로드
 STOCK_SERVICE_URL = current_config.BASE_URL
