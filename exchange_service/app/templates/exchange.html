@@ -31,7 +31,11 @@
         </div>
         <p class="exchange-rate"><strong>환율:</strong> 1 USD = 
             <span id="exchange_rate">
-                {{ '{:.2f}'.format(exchange_rate) if exchange_rate else "N/A" }}
+                {% if exchange_rate %}
+                    {{ "%.2f"|format(exchange_rate) }}
+                {% else %}
+                    1450.00 (기본값)
+                {% endif %}
             </span> KRW
         </p>
         <nav class="navbar">

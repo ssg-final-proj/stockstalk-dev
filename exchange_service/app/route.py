@@ -46,17 +46,17 @@ def get_exchange_rate():
         cached_rate = redis_client_exchange.get('cached_exchange_rate')
         if cached_rate:
             logger.info(f"✅ Redis 캐시된 환율 사용: {cached_rate}")
-            return float(cached_rate)
+            return float(cached_rate)  # 문자열을 float으로 변환
 
         ticker = yf.Ticker("USDKRW=X")
-        exchange_rate = ticker.history(period="1d")['Close'].iloc[-1]
+        exchange_rate = float(ticker.history(period="1d")['Close'].iloc[-1])  # numpy -> Python float
         rounded_rate = round(exchange_rate, 2)
 
         redis_client_exchange.setex('cached_exchange_rate', timedelta(hours=1), rounded_rate)
         logger.info(f"📡 실시간 환율 조회 성공: {rounded_rate}")
         return rounded_rate
     except Exception as e:
-        logger.error(f"❌ 환율 데이터 오류: {e}")
+        logger.error(f"❌ 환율 데이터 오류: {str(e)}", exc_info=True)  # 상세 오류 로깅
         return None
 
 @exchange.route('/', methods=['GET', 'POST'])
