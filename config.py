@@ -5,10 +5,11 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SESSION_TYPE = 'filesystem'
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 280,
+        "pool_size": 5,
+        "max_overflow": 3,
+        "pool_recycle": 1800,
+        "pool_pre_ping": True
     }
-
     REDIS_HOST = os.getenv('REDIS_HOST', 'redis.infra.svc.cluster.local')
     REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
     CACHE_DURATION = int(os.getenv('CACHE_DURATION', 100))
