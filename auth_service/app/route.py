@@ -94,7 +94,7 @@ def kakaoLoginLogicRedirect():
                 kakao_id=kakao_id,
                 username=username,
                 email=email,
-                seed_krw=1000000.0,
+                seed_krw=5000000.0,
                 seed_usd=0.0,
                 created_at=datetime.now(timezone.utc),
                 last_login=datetime.now(timezone.utc),
