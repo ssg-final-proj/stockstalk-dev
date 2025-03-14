@@ -345,9 +345,14 @@ async def update_stock_data(redis_client, fetch_all_stock_data, cache_duration):
             logging.info("Fetching updated stock data...")
             stock_data_list = await fetch_all_stock_data(redis_client)
             if stock_data_list:
-                logging.info("Updating Redis with new stock data")
-                redis_client.setex('realtime_stock_data', cache_duration, json.dumps(stock_data_list))
-                logging.info("Redis update successful")
+                logging.info("Updating Redis with new stock data using transaction")
+
+                with redis_client.pipeline() as pipe:
+                    pipe.multi()  # 🔹 트랜잭션 시작
+                    pipe.setex('realtime_stock_data', cache_duration, json.dumps(stock_data_list))
+                    pipe.execute()  # 🔹 트랜잭션 실행
+                
+                logging.info("Redis update successful with transaction")
             else:
                 logging.error("Stock data update failed: empty list")
         except Exception as e:
