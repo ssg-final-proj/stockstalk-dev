@@ -102,7 +102,7 @@ async def fetch_stock_data(code, broker, symbols, redis_client_stock=None):
 
 async def fetch_all_stock_data(redis_client_stock=None):
     broker, symbols = initialize_broker_and_symbols()
-    semaphore = asyncio.Semaphore(30)  # 동시에 최대 30개의 작업만 실행되도록 제한
+    semaphore = asyncio.Semaphore(30)  # 동시에 최대 30개의 작업 실행 제한
 
     async def limited_fetch_stock_data(code):
         async with semaphore:
@@ -111,6 +111,16 @@ async def fetch_all_stock_data(redis_client_stock=None):
     tasks = [limited_fetch_stock_data(code) for code in STOCK_CODES]
     results = await asyncio.gather(*tasks)
     stock_data_list = [result for result in results if result is not None]
+
+    if redis_client_stock:
+        logging.info("Updating Redis with new stock data using transaction")
+        with redis_client_stock.pipeline() as pipe:
+            pipe.multi()
+            for stock_data in stock_data_list:
+                pipe.setex(f'stock_data:{stock_data["code"]}', CACHE_DURATION, json.dumps(stock_data))
+            pipe.execute()
+        logging.info("Redis update successful with transaction")
+
     return stock_data_list
 
 def fetch_chart_data(symbol, timeframe):
