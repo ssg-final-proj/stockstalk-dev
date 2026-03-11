@@ -153,7 +153,7 @@ Pod
 
 ---
 
-## CI / CD
+## CI (Docker Build & ECR Push)
 
 Docker 이미지는 GitHub Actions를 통해 자동 빌드됩니다.
 
